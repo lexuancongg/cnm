@@ -1,9 +1,9 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
-from backend.models.base import Base
+from models.base import BaseModel
 
 
-class Address(Base):
+class Address(BaseModel):
     __tablename__ = "address"
 
     id = Column(Integer, primary_key=True, index=True)

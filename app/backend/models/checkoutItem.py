@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Numeric
 from sqlalchemy.orm import relationship
-from backend.models.base import BaseModel
+from models.base import BaseModel
 
 class CheckoutItem(BaseModel):
     product_id = Column(Integer, nullable=False)

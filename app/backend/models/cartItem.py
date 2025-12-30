@@ -1,11 +1,13 @@
 from sqlalchemy import Column, String, Integer, ForeignKey, PrimaryKeyConstraint
 from sqlalchemy.ext.declarative import declarative_base
+from models.base import BaseModel 
+
 
 Base = declarative_base()
 
-class CartItem(Base):
+class CartItem(BaseModel):
     __tablename__ = "cart_item"
-    customer_id = Column(String, primary_key=True)
+    customer_id = Column(String(50), primary_key=True)
     product_id = Column(Integer, primary_key=True)
     quantity = Column(Integer, nullable=False)
 

@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
-from backend.models.base import BaseModel
+from models.base import BaseModel
 
 class District(BaseModel):
     name = Column(String(450), nullable=False)

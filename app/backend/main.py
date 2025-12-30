@@ -1,0 +1,106 @@
+# main.py
+from fastapi import FastAPI, Request,Query,Depends, HTTPException
+from fastapi.responses import RedirectResponse
+from starlette.middleware.sessions import SessionMiddleware
+from authlib.integrations.starlette_client import OAuth
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
+from fastapi.responses import StreamingResponse
+from db.session import SessionLocal
+from typing import List
+from schemas.category_schema import CategoryVm
+from schemas.authentication_schema import AuthenticatedUserVm,AuthenticationInfoVm
+from service.categoryService import categoryService
+from service.imageService import imageService
+
+app = FastAPI()
+app.add_middleware(SessionMiddleware, secret_key="!secret")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Config Keycloak
+KEYCLOAK_SERVER = "http://localhost:8080/realms/ecommerce"
+CLIENT_ID = "xuancong-ecommerce"
+CLIENT_SECRET = "B9JECyEI7BKAKGeG7fOLssGKYXXPLxXr"
+REDIRECT_URI = "http://localhost:8000/auth"
+FRONTEND_URL = "http://localhost:3000"
+
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+oauth = OAuth()
+oauth.register(
+    name="keycloak",
+    client_id=CLIENT_ID,
+    client_secret=CLIENT_SECRET,
+    server_metadata_url=f"{KEYCLOAK_SERVER}/.well-known/openid-configuration",
+    client_kwargs={"scope": "openid roles"},
+)
+
+@app.get("/login")
+async def login(request: Request):
+    return await oauth.keycloak.authorize_redirect(request, REDIRECT_URI)
+
+@app.get("/auth")
+async def auth(request: Request):
+    token = await oauth.keycloak.authorize_access_token(request)
+    access_token = token["access_token"]
+    refresh_token = token["refresh_token"]
+    user = token["userinfo"]
+    id_token = token["id_token"]
+    request.session["user"] = {
+        "sub": user["sub"],
+        "username": user["preferred_username"],
+        "email": user["email"],
+        "name": user["name"],
+    }
+
+    
+   
+    return RedirectResponse(FRONTEND_URL)
+
+
+
+@app.get("/authentication", response_model=AuthenticationInfoVm)
+async def authentication(request: Request):
+    user = request.session.get("user")
+    
+    if not user:
+        return AuthenticationInfoVm(isAuthenticated=False, authenticatedUser=None)
+    
+    authenticated_user = AuthenticatedUserVm(username=user["username"])
+    return AuthenticationInfoVm(isAuthenticated=True, authenticatedUser=authenticated_user)
+
+
+
+@app.get("/api/customer/categories", response_model=List[CategoryVm])
+def api_get_categories(category_name: str = Query("", alias="categoryName"), db: Session = Depends(get_db)):
+    service = categoryService(db)
+    return service.get_categories(category_name)
+
+@app.get("/images/{id}/file/{file_name}")
+def get_file(id: int, file_name: str, db: Session = Depends(get_db)):
+    service = imageService(db)
+    result = service.get_file(id, file_name)
+    if not result:
+        raise HTTPException(status_code=404, detail="File not found")
+    
+    stream, media_type = result
+    return StreamingResponse(
+        stream,
+        media_type=media_type,
+        headers={"Content-Disposition": f'attachment; filename="{file_name}"'}
+    )

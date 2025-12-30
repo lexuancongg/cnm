@@ -1,0 +1,4 @@
+CREATE DATABASE keycloak;
+CREATE DATABASE demo;
+
+

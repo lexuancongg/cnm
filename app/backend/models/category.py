@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
-from backend.models.base import BaseModel  
+from models.base import BaseModel  
 
 class Category(BaseModel):
     name = Column(String(200), nullable=False)
@@ -10,4 +10,4 @@ class Category(BaseModel):
     image_id = Column(Integer, nullable=True)
 
 
-    product_categories = relationship("ProductCategory", backref="category", cascade="all, delete-orphan")
+    # product_categories = relationship("ProductCategory", backref="category", cascade="all, delete-orphan")

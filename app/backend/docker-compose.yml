@@ -1,0 +1,61 @@
+version: "3.9"
+services:
+
+  mysql:
+    image: mysql:8.1
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: keycloak
+      MYSQL_USER: xuancong
+      MYSQL_PASSWORD: xuancong
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
+    networks:
+      - lexuancong-network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phpmyadmin
+    environment:
+      PMA_HOST: mysql   
+    ports:
+      - "8081:80"      
+    depends_on:
+      - mysql
+    networks:
+      - lexuancong-network
+
+      
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.0.2
+    command: 'start-dev --import-realm'
+    environment:
+      KEYCLOAK_ADMIN: lexuancong
+      KEYCLOAK_ADMIN_PASSWORD: lexuancong
+      KC_DB: mysql
+      KC_DB_URL: jdbc:mysql://mysql:3306/keycloak?useSSL=false&allowPublicKeyRetrieval=true
+      KC_DB_USERNAME: xuancong
+      KC_DB_PASSWORD: xuancong
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+    networks:
+      - lexuancong-network
+    volumes:
+      - ./custom-theme-keycloak/themes/e-commerce/theme:/opt/keycloak/themes
+      - ./docker/keycloak/realm/realm-config-export.json:/opt/keycloak/data/import/realm-export.json
+
+networks:
+  lexuancong-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
+  pgadmin:
+  redis:
