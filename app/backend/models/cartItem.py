@@ -6,7 +6,7 @@ from models.base import BaseModel
 Base = declarative_base()
 
 class CartItem(BaseModel):
-    __tablename__ = "cart_item"
+    
     customer_id = Column(String(50), primary_key=True)
     product_id = Column(Integer, primary_key=True)
     quantity = Column(Integer, nullable=False)

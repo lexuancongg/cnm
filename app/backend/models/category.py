@@ -10,4 +10,4 @@ class Category(BaseModel):
     image_id = Column(Integer, nullable=True)
 
 
-    # product_categories = relationship("ProductCategory", backref="category", cascade="all, delete-orphan")
+    product_categories = relationship("ProductCategory", back_populates="category", cascade="all, delete-orphan")
