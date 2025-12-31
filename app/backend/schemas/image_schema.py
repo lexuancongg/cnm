@@ -8,3 +8,12 @@ from pydantic import BaseModel
 class ImagePreviewVm(BaseModel):
     id: int
     url: str
+
+
+
+class ImageDetailVm(BaseModel):
+    id: int
+    description: Optional[str]
+    fileName: str
+    imageType: str
+    url: str

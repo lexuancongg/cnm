@@ -12,7 +12,7 @@ class Product(BaseModel):
     slug = Column(String(255))
     price = Column(Numeric(15, 2))
     is_public = Column(Boolean, default=True)
-    is_feature = Column(Boolean, default=False)
+    is_feature = Column(Boolean, default=True)
     avatar_image_id = Column(BigInteger)
     author_id = Column(Integer, ForeignKey("author.id"))
     author = relationship("Author", back_populates="products")

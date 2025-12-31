@@ -13,6 +13,11 @@ from schemas.category_schema import CategoryVm
 from schemas.authentication_schema import AuthenticatedUserVm,AuthenticationInfoVm
 from service.categoryService import categoryService
 from service.imageService import imageService
+from schemas.product_schema import ProductPreviewPagingVm
+from service.productService import productService
+from schemas.cart_schema import CartItemDetailVm
+from models.cartItem import CartItem
+from service.cartService import cartService
 
 app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key="!secret")
@@ -91,6 +96,9 @@ def api_get_categories(category_name: str = Query("", alias="categoryName"), db:
     service = categoryService(db)
     return service.get_categories(category_name)
 
+
+
+
 @app.get("/images/{id}/file/{file_name}")
 def get_file(id: int, file_name: str, db: Session = Depends(get_db)):
     service = imageService(db)
@@ -104,3 +112,26 @@ def get_file(id: int, file_name: str, db: Session = Depends(get_db)):
         media_type=media_type,
         headers={"Content-Disposition": f'attachment; filename="{file_name}"'}
     )
+
+
+@app.get("/api/product/customer/products/featured", response_model=ProductPreviewPagingVm)
+def get_featured_products_paging(
+    pageIndex: int = Query(0),
+    pageSize: int = Query(10),
+    db: Session = Depends(get_db)
+):
+    product_service = productService(db)
+    return product_service.get_featured_products_paging(pageIndex, pageSize)
+
+
+@app.get("/cart/customer/cart-items", response_model= List[CartItemDetailVm])
+def getCartItems(request:Request, db: Session = Depends(get_db)):
+    user = request.session.get("user")
+    if not user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    customer_id = user["sub"]  
+    cart_service = cartService(db)
+    return cart_service.getCartItems(customer_id= customer_id)
+    
+  
+
