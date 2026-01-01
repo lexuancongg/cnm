@@ -5,10 +5,11 @@ from pathlib import Path
 from models.product import Product
 from schemas.product_schema import ProductPreviewPagingVm, ProductPreviewVm
 from service.imageService import ImageService
-from schemas.cart_schema import CartItemDetailVm
+from schemas.cart_schema import CartItemDetailVm,CartItemGetVm
 from models.cartItem import CartItem
 from sqlalchemy import desc
 from service.productService import ProductService,productService
+from schemas.cart_schema import CartItemPostVm
 
 
 class CartService:
@@ -51,6 +52,32 @@ class CartService:
         
         
         return result
+
+    def addCartItem(self,cart_item_post_vm:CartItemPostVm, customer_id: str)->CartItemGetVm:
+        existing_item: Optional[CartItem] = (
+            self.db.query(CartItem)
+            .filter(CartItem.customer_id == customer_id)
+            .filter(CartItem.product_id == cart_item_post_vm.productId)
+            .first()
+        )
+        if existing_item:   
+            existing_item.quantity += cart_item_post_vm.quantity
+            self.db.add(existing_item)
+            self.db.commit()
+            self.db.refresh(existing_item)
+            return CartItemGetVm(customer_id= customer_id,product_id=cart_item_post_vm.productId,quantity=existing_item.quantity)
+        else:
+       
+            new_item = CartItem(
+                customer_id=customer_id,
+                product_id=cart_item_post_vm.productId,
+                quantity=cart_item_post_vm.quantity
+            )
+            self.db.add(new_item)
+            self.db.commit()
+            self.db.refresh(new_item)
+            return CartItemGetVm(customer_id= customer_id,product_id=cart_item_post_vm.productId,quantity=new_item.quantity)
+
 
 
         

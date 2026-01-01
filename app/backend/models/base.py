@@ -10,7 +10,8 @@ class Base(DeclarativeBase):
 class BaseModel(Base):
     __abstract__ = True
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     created_by = Column(String(100))
 
@@ -20,3 +21,8 @@ class BaseModel(Base):
         onupdate=datetime.datetime.utcnow
     )
     last_updated_by = Column(String(100))
+    
+
+
+
+

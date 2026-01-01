@@ -3,8 +3,10 @@ from sqlalchemy.orm import Session
 from typing import Optional, IO,List
 from pathlib import Path
 from models.product import Product
-from schemas.product_schema import ProductPreviewPagingVm, ProductPreviewVm
+from schemas.product_schema import ProductPreviewPagingVm, ProductPreviewVm,ProductDetailVm
 from service.imageService import ImageService
+from fastapi import HTTPException
+
 
 
 class ProductService:
@@ -63,6 +65,34 @@ class ProductService:
             )
         
         return result;
+
+
+    def getProductDetailBySlug(self , slug:str)->ProductDetailVm:
+        product:Product = self.db.query(Product).filter(Product.slug == slug).first()
+        if not product:
+            raise HTTPException(status_code=404, detail=f"Product not found: {slug}")
+        
+        avatar_url : str = self.image_service.get_image_by_id(product.avatar_image_id).url
+        image_ids = [ img.image_id for img in product.product_images]
+        product_image_urls = [self.image_service.get_image_by_id(image_id).url for image_id in image_ids]
+        author_name = product.author.name
+
+        categories =  [category.category.name for category in product.product_categories]
+        return ProductDetailVm(
+            id=product.id,
+            name=product.name,
+            authorName=author_name,
+            categories=categories,
+            description=product.description,
+            specifications=product.specifications,
+            slug=product.slug,
+            price=float(product.price),
+            avatarUrl=avatar_url,
+            productImageUrls=product_image_urls
+        )
+
+
+
 
 
 

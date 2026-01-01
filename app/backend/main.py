@@ -1,5 +1,5 @@
 # main.py
-from fastapi import FastAPI, Request,Query,Depends, HTTPException
+from fastapi import FastAPI, Request,Query,Depends, HTTPException,Path
 from fastapi.responses import RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
 from authlib.integrations.starlette_client import OAuth
@@ -13,9 +13,9 @@ from schemas.category_schema import CategoryVm
 from schemas.authentication_schema import AuthenticatedUserVm,AuthenticationInfoVm
 from service.categoryService import categoryService
 from service.imageService import imageService
-from schemas.product_schema import ProductPreviewPagingVm
+from schemas.product_schema import ProductPreviewPagingVm, ProductDetailVm
 from service.productService import productService
-from schemas.cart_schema import CartItemDetailVm
+from schemas.cart_schema import CartItemDetailVm,CartItemGetVm,CartItemPostVm
 from models.cartItem import CartItem
 from service.cartService import cartService
 
@@ -135,3 +135,25 @@ def getCartItems(request:Request, db: Session = Depends(get_db)):
     
   
 
+@app.get("/api/product/customer/products/{slug}", response_model=ProductDetailVm)
+async def get_product_detail(db:Session = Depends(get_db),slug: str = Path(..., description="product slug")):
+    product_service = productService(db)
+    return product_service.getProductDetailBySlug(slug)
+    
+    
+@app.post("/cart/customer/cart-items", response_model=CartItemGetVm)
+def add_cart_item(
+    request: Request,
+    cart_item_post_vm: CartItemPostVm,
+    db: Session = Depends(get_db)
+):
+
+
+    user = request.session.get("user")
+    cart_service  = cartService(db)
+    if not user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    customer_id = user["sub"]  
+    return cart_service.addCartItem(cart_item_post_vm=cart_item_post_vm , customer_id= customer_id)
+
+    

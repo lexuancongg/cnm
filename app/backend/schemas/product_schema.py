@@ -23,3 +23,18 @@ class ProductPreviewPagingVm(BaseModel):
     totalElements: int
     totalPages: int
     isLast: bool
+
+
+
+class ProductDetailVm(BaseModel):
+    id:int
+    name:str
+    authorName:str
+    categories:List[str]
+    description:str
+    specifications:str
+    slug:str
+    price:float
+    avatarUrl:str
+    productImageUrls:List[str]
+

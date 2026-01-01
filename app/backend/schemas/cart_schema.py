@@ -22,3 +22,9 @@ class CartItemDetailVm(BaseModel):
     slug: str
     avatarUrl: str
     price: float
+
+
+
+class CartItemPostVm(BaseModel):
+    quantity : int
+    productId :int
