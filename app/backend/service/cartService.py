@@ -1,15 +1,15 @@
 from models.image import Image
 from sqlalchemy.orm import Session
+from fastapi import FastAPI, HTTPException, Depends, Path
 from typing import Optional, IO,List,Dict
 from pathlib import Path
 from models.product import Product
 from schemas.product_schema import ProductPreviewPagingVm, ProductPreviewVm
 from service.imageService import ImageService
-from schemas.cart_schema import CartItemDetailVm,CartItemGetVm
+from schemas.cart_schema import CartItemDetailVm,CartItemGetVm,CartItemPostVm,CartItemPutVm
 from models.cartItem import CartItem
 from sqlalchemy import desc
 from service.productService import ProductService,productService
-from schemas.cart_schema import CartItemPostVm
 
 
 class CartService:
@@ -40,9 +40,9 @@ class CartService:
 
             result.append(
                 CartItemDetailVm(
-                    product_id=product_id,
+                    productId=product_id,
                     quantity=cart_item.quantity,
-                    product_name=product.name,
+                    productName=product.name,
                     slug=product.slug,
                     avatarUrl=product.avatarUrl,
                     price=product.price,
@@ -65,7 +65,7 @@ class CartService:
             self.db.add(existing_item)
             self.db.commit()
             self.db.refresh(existing_item)
-            return CartItemGetVm(customer_id= customer_id,product_id=cart_item_post_vm.productId,quantity=existing_item.quantity)
+            return CartItemGetVm(customerId= customer_id,productId=cart_item_post_vm.productId,quantity=existing_item.quantity)
         else:
        
             new_item = CartItem(
@@ -76,12 +76,41 @@ class CartService:
             self.db.add(new_item)
             self.db.commit()
             self.db.refresh(new_item)
-            return CartItemGetVm(customer_id= customer_id,product_id=cart_item_post_vm.productId,quantity=new_item.quantity)
+            return CartItemGetVm(customerId= customer_id,productId=cart_item_post_vm.productId,quantity=new_item.quantity)
 
 
 
+    def updateCartItem(self,cartItemPutVm: CartItemPutVm , customerId:int,productId:int):
+        cart_item_in_db : Optional[CartItem] = (
+            self.db.query(CartItem)
+            .filter(CartItem.customer_id == customerId ,CartItem.product_id ==productId)
+            .first()
+        )
+        if not cart_item_in_db:
+            raise HTTPException(status_code=404, detail="CartItem not found")
         
-        
+        cart_item_in_db.quantity = cartItemPutVm.quantity
+        self.db.add(cart_item_in_db)
+        self.db.commit()
+        self.db.refresh(cart_item_in_db)
+
+        return CartItemGetVm(
+            customerId=customerId,
+            productId=productId,
+            quantity=cart_item_in_db.quantity
+        )
+    def deleteCartItem(self,productId :int , customerId : int)->None:
+        cart_item_in_db : Optional[CartItem] = (
+            self.db.query(CartItem)
+            .filter(CartItem.customer_id == customerId ,CartItem.product_id ==productId)
+            .first()
+        )
+        if not cart_item_in_db:
+            raise HTTPException(status_code=404, detail="CartItem not found")
+        self.db.delete(cart_item_in_db)
+        self.db.commit()
+
+
 
 
 
