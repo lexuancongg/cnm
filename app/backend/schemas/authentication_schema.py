@@ -7,3 +7,4 @@ class AuthenticatedUserVm(BaseModel):
 class AuthenticationInfoVm(BaseModel):
     isAuthenticated: bool
     authenticatedUser: Optional[AuthenticatedUserVm] = None
+

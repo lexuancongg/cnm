@@ -18,6 +18,8 @@ from service.productService import productService
 from schemas.cart_schema import CartItemDetailVm,CartItemGetVm,CartItemPostVm, CartItemPutVm
 from models.cartItem import CartItem
 from service.cartService import cartService
+from schemas.checkout_schema import CheckoutPostVm,CheckoutVm
+from service.checkoutService import checkoutService
 
 app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key="!secret")
@@ -186,4 +188,20 @@ def deleteCartItem(
         raise HTTPException(status_code=401, detail="Unauthorized")
     customer_id = user["sub"]  
     return cart_service.deleteCartItem(customerId=customer_id,productId=product_id)
+
     
+
+@app.post("/customer/checkouts")
+def createCheckout(
+    request:Request,
+    checkoutPostVm:CheckoutPostVm,
+    db:Session = Depends(get_db)
+)->CheckoutVm:
+    user = request.session.get("user")
+    checkout_service = checkoutService(db)
+    if not user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    customer_id = user["sub"]  
+    return checkout_service.createCheckout(checkoutPostVm=checkoutPostVm,customerId=customer_id)
+    
+
