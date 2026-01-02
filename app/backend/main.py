@@ -205,3 +205,16 @@ def createCheckout(
     return checkout_service.createCheckout(checkoutPostVm=checkoutPostVm,customerId=customer_id)
     
 
+@app.get("/customer/checkouts/{id}",response_model= CheckoutVm)
+def getCheckoutById(
+    request:Request,
+    id:int,
+    db:Session = Depends(get_db)
+
+):
+    user = request.session.get("user")
+    checkout_service = checkoutService(db)
+    if not user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    customer_id = user["sub"]
+    return checkout_service.getCheckoutById(customerId=customer_id , id=id)

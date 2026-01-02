@@ -1,6 +1,6 @@
 from models.image import Image
 from sqlalchemy.orm import Session
-from fastapi import FastAPI, HTTPException, Depends, Path
+from fastapi import FastAPI, HTTPException, Depends, Path,status
 from typing import Optional, IO,List,Dict
 from pathlib import Path
 from models.product import Product
@@ -61,6 +61,23 @@ class CheckoutService:
             checkout_items.append(checkout_item)
             
         return checkout_items
+    
+
+    def getCheckoutById(self,customerId:int,id:int)->CheckoutVm:
+        checkout :Checkout= self.db.query(Checkout).filter(Checkout.id == id).first()
+        if not checkout:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="CHECKOUT_NOT_FOUND"
+            )
+        if checkout.customer_id != customerId:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="ACCESS_DENIED"
+            )
+        return CheckoutVm.from_model(checkout)
+
+
 
 
     
