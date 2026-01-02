@@ -268,3 +268,16 @@ def createUserAddress(
         raise HTTPException(status_code=401, detail="Unauthorized")
     customer_id = user["sub"]
     return user_address_service.createUserAddress(customerId=customer_id,addressPostVm=addressPostVm)
+
+
+
+@app.get("/customer/user-address/addresses",response_model=List[AddressDetailVm])
+def getUserAddressDetail(
+    request:Request,
+    user_address_service:UserAddressService = Depends(userAddressService)
+):
+    user = request.session.get("user")
+    if not user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    customer_id = user["sub"]
+    return user_address_service.getUserAddressDetail(customerId=customer_id)

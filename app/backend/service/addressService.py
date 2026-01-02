@@ -71,6 +71,14 @@ class AddressService:
         return AddressVm.from_model(address)
 
 
+    def getAddresses( self,ids:list[int])->list[AddressDetailVm]:
+        addresses:list[Address] = (
+            self.db.query(Address)
+            .filter(Address.id.in_(ids))
+            .all()
+        )
+        return [AddressDetailVm.from_model(address) for address in addresses]
+
   
 
 
