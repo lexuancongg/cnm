@@ -29,7 +29,8 @@ from service.province_service import *
 from schemas.district_schema import *
 from service.districtService import *
 from schemas.userAddress_schema import *
-
+from schemas.order_schema import *
+from service.orderService import *
 app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key="!secret")
 
@@ -281,3 +282,17 @@ def getUserAddressDetail(
         raise HTTPException(status_code=401, detail="Unauthorized")
     customer_id = user["sub"]
     return user_address_service.getUserAddressDetail(customerId=customer_id)
+
+
+@app.post("/customer/orders",response_model=None)
+def createOrder(
+    request:Request,
+    orderPostVm :OrderPostVm,
+    order_service:OrderService = Depends(orderService)
+):
+    user = request.session.get("user")
+    if not user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    customer_id = user["sub"]
+    
+    return order_service.createOrder(orderPostVm=orderPostVm,customerId=customer_id)
