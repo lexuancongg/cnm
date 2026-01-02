@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from fastapi.responses import StreamingResponse
-from db.session import SessionLocal
+from db.session import get_db
 from typing import List
 from schemas.category_schema import CategoryVm
 from schemas.authentication_schema import AuthenticatedUserVm,AuthenticationInfoVm
@@ -20,6 +20,15 @@ from models.cartItem import CartItem
 from service.cartService import cartService
 from schemas.checkout_schema import CheckoutPostVm,CheckoutVm
 from service.checkoutService import checkoutService
+from schemas.address_schema import AddressDetailVm
+from service.userAddressService import *
+from schemas.country_schema import *
+from service.countryService import *
+from schemas.province_schema import *
+from service.province_service import *
+from schemas.district_schema import *
+from service.districtService import *
+from schemas.userAddress_schema import *
 
 app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key="!secret")
@@ -40,13 +49,6 @@ REDIRECT_URI = "http://localhost:8000/auth"
 FRONTEND_URL = "http://localhost:3000"
 
 
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 oauth = OAuth()
 oauth.register(
@@ -218,3 +220,51 @@ def getCheckoutById(
         raise HTTPException(status_code=401, detail="Unauthorized")
     customer_id = user["sub"]
     return checkout_service.getCheckoutById(customerId=customer_id , id=id)
+
+
+@app.get("/customer/user-address/default", response_model=AddressDetailVm)
+def getDefaultAddress(request:Request ,user_address_service :userAddressService = Depends(userAddressService) ):
+    user = request.session.get("user")
+    if not user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    customer_id = user["sub"]
+    return user_address_service.getDefaultAddress(customerId=customer_id)
+
+
+
+
+@app.get("/customer/countries",response_model=List[CountryGetVm])
+def getCountries(country_service :CountryService = Depends(countryService)):
+    return country_service.getCountries()
+
+    
+
+
+
+@app.get("/customer/provinces/{countryId}",response_model=List[ProvinceGetVm])
+def getProvincesByCountryId(
+    countryId:int,
+    province_service:ProvinceService = Depends(provinceService)
+):
+    return province_service.getProvincesByCountryId(countryId)
+
+
+@app.get("/customer/districts/{provinceId}",response_model= List[DistrictGetVm])
+def getDistrictByProvinceId(
+    provinceId:int,
+    district_service:DistrictService = Depends(districtService)
+):
+    return district_service.getProvincesByCountryId(provinceId)
+
+
+@app.post("/customer/user-address",response_model=UserAddressVm)
+def createUserAddress(
+    request:Request,
+    addressPostVm: AddressPostVm,
+    user_address_service:UserAddressService = Depends(userAddressService)
+):
+    user = request.session.get("user")
+    if not user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    customer_id = user["sub"]
+    return user_address_service.createUserAddress(customerId=customer_id,addressPostVm=addressPostVm)

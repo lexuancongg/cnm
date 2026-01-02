@@ -4,9 +4,7 @@ from models.base import BaseModel
 
 
 class Address(BaseModel):
-    __tablename__ = "address"
 
-    id = Column(Integer, primary_key=True, index=True)
 
     contact_name = Column(String(450))
     phone_number = Column(String(25))
