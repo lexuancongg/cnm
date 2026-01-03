@@ -33,6 +33,11 @@ from schemas.order_schema import *
 from service.orderService import *
 from schemas.payment_schema import *
 from service.paypalPayment_service import *
+from schemas.customer_schema import *
+from service.customerService import *
+
+
+
 app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key="!secret")
 
@@ -47,7 +52,7 @@ app.add_middleware(
 # Config Keycloak
 KEYCLOAK_SERVER = "http://localhost:8080/realms/ecommerce"
 CLIENT_ID = "xuancong-ecommerce"
-CLIENT_SECRET = "B9JECyEI7BKAKGeG7fOLssGKYXXPLxXr"
+CLIENT_SECRET = "y3BkvJfZ8BpR4jdWsHuBu5XIjOLpRAB7"
 REDIRECT_URI = "http://localhost:8000/auth"
 FRONTEND_URL = "http://localhost:3000"
 
@@ -73,12 +78,18 @@ async def auth(request: Request):
     refresh_token = token["refresh_token"]
     user = token["userinfo"]
     id_token = token["id_token"]
+
     request.session["user"] = {
         "sub": user["sub"],
         "username": user["preferred_username"],
         "email": user["email"],
         "name": user["name"],
+        "firstname": user["given_name"],
+        "lastname":user["family_name"]
     }
+    request.session["access_token"] = token["access_token"]
+    request.session["refresh_token"] = token["refresh_token"]
+
 
     
    
@@ -312,9 +323,48 @@ def initPayment(
 
 
 
+
 @app.post("/capture",response_model=CapturePaymentResponseVm)
 def capturePaypalPayment(
     capturePaymentRequest:CapturePaymentRequestVm,
     paypay_payment_service  : PaypalPaymentService= Depends(paypalPaymentService)
 ):
     return paypay_payment_service.capturePaymentPaypal(capturePaymentRequest= capturePaymentRequest)
+
+
+@app.get("/api/customers/profile",response_model=CustomerVm)
+async def  getCustomerProfile(request:Request):
+    user = request.session.get("user")
+    print(user)
+
+    if not user:
+        raise HTTPException(status_code=401, detail="Unauthenticated")
+
+    return CustomerVm.from_keycloak_user(user)
+
+
+
+
+@app.put("/customer/profile",response_model=None)
+def updateCustomerProfile(
+    request:Request,
+    customerPutVm: CustomerProfilePutVm,
+    customer_service:CustomerService = Depends(customerService)
+):
+    user = request.session.get("user")
+    customer_id = user["sub"]
+    customerPutVm.username = user["username"]
+    access_token = request.session.get("access_token")
+
+
+
+    if not access_token:
+        raise HTTPException(401, "Unauthenticated")
+    customer_service.updateCustomer(access_token= access_token, user_id = customer_id, customerPutVm= customerPutVm)
+
+
+    request.session["user"].update({
+        "email": customerPutVm.email,
+        "firstname": customerPutVm.firstName,
+        "lastname": customerPutVm.lastName
+    })
