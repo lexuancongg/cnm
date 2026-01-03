@@ -395,3 +395,25 @@ def getAddress(
 ):
     return address_service.getAddressById(id=id)
     
+
+@app.put("/customer/addresses/{id}",response_model=None)
+def updateAddress(
+    id:int,
+    addressPostVm:AddressPostVm,
+    address_service:AddressService = Depends(addressService)
+):
+    address_service.updateAddress(addressPostVm=addressPostVm,id=id)
+
+
+@app.delete("/customer/user-address/{id}")
+def deleteAddress(
+    request:Request,
+    id:int,
+    user_address_service:UserAddressService = Depends(userAddressService)
+):
+    user = request.session.get("user")
+
+    if not user:
+        raise HTTPException(status_code=401, detail="Unauthenticated")
+    customer_id = user["sub"]
+    user_address_service.deleteAddress(id=id,customerId=customer_id)

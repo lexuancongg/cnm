@@ -94,6 +94,24 @@ class UserAddressService:
             self.db.refresh(userAddress)
 
 
+    def deleteAddress(self,id:int,customerId:str):
+        userAddress: UserAddress = (
+            self.db.query(UserAddress)
+            .filter(UserAddress.user_id==customerId,UserAddress.address_id == id)
+            .first()
+        )
+        if not userAddress:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="address not found"
+            
+            )
+        self.db.delete(userAddress)
+        self.db.commit()
+        self.addressService.deleteAddress(id=id)
+
+        
+
 def userAddressService(db:Session =Depends(get_db), address_service:AddressService = Depends(addressService)):
     return UserAddressService(db,address_service)
         
