@@ -10,7 +10,9 @@ class ProvinceService:
 
     def getProvincesByCountryId(self,countryId:int )->list[ProvinceGetVm]:
         provinces:list[Province] = (
-            self.db.query(Province).all()
+            self.db.query(Province)
+            .filter(Province.country_id ==countryId)
+            .all()
         )
         return [ProvinceGetVm.from_model(province) for province in provinces ]
 

@@ -8,9 +8,11 @@ class DistrictService:
         self.db = db
     
 
-    def getProvincesByCountryId(self,countryId:int )->list[DistrictGetVm]:
+    def getDictrictByProviceId(self,provinceId:int )->list[DistrictGetVm]:
         districts:list[District] = (
-            self.db.query(District).all()
+            self.db.query(District)
+            .filter(District.province_id ==provinceId)
+            .all()
         )
         return [DistrictGetVm.from_model(district) for district in districts ]
 

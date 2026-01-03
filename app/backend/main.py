@@ -268,7 +268,7 @@ def getDistrictByProvinceId(
     provinceId:int,
     district_service:DistrictService = Depends(districtService)
 ):
-    return district_service.getProvincesByCountryId(provinceId)
+    return district_service.getDictrictByProviceId(provinceId)
 
 
 @app.post("/customer/user-address",response_model=UserAddressVm)
@@ -384,3 +384,14 @@ def chooseDefaultAddress(
         raise HTTPException(status_code=401, detail="Unauthenticated")
     customer_id = user["sub"]
     user_address_service.chooseDefaultAddress(customerId=customer_id,id=id)
+
+
+@app.get("/customer/address/{id}",response_model=AddressDetailVm)
+def getAddress(
+    request:Request,
+    id:int,
+    address_service :AddressService = Depends(addressService)
+
+):
+    return address_service.getAddressById(id=id)
+    
