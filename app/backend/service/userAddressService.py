@@ -75,6 +75,24 @@ class UserAddressService:
         addressDetailVms.sort(key=lambda x: x.isActive, reverse=True)
 
         return addressDetailVms
+    
+
+    def chooseDefaultAddress(self, id: int, customerId: str):
+        userAddresses: list[UserAddress] = (
+            self.db.query(UserAddress)
+            .filter(UserAddress.user_id == customerId)
+            .all()
+        )
+        
+        for userAddress in userAddresses:
+            userAddress.is_active = (userAddress.address_id == id)
+            self.db.add(userAddress) 
+
+        self.db.commit()
+        
+        for userAddress in userAddresses:
+            self.db.refresh(userAddress)
+
 
 def userAddressService(db:Session =Depends(get_db), address_service:AddressService = Depends(addressService)):
     return UserAddressService(db,address_service)

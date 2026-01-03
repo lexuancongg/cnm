@@ -368,3 +368,19 @@ def updateCustomerProfile(
         "firstname": customerPutVm.firstName,
         "lastname": customerPutVm.lastName
     })
+
+
+
+
+@app.put("/customer/user-address/{id}",response_model=None)
+def chooseDefaultAddress(
+    request:Request,
+    id:int,
+    user_address_service :UserAddressService = Depends(userAddressService)
+):
+    user = request.session.get("user")
+
+    if not user:
+        raise HTTPException(status_code=401, detail="Unauthenticated")
+    customer_id = user["sub"]
+    user_address_service.chooseDefaultAddress(customerId=customer_id,id=id)
