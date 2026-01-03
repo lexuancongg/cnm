@@ -31,6 +31,8 @@ from service.districtService import *
 from schemas.userAddress_schema import *
 from schemas.order_schema import *
 from service.orderService import *
+from schemas.payment_schema import *
+from service.paypalPayment_service import *
 app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key="!secret")
 
@@ -296,3 +298,23 @@ def createOrder(
     customer_id = user["sub"]
     
     return order_service.createOrder(orderPostVm=orderPostVm,customerId=customer_id)
+
+
+
+
+@app.post("/init",response_model=InitPaymentResponse)
+def initPayment(
+    initPaymentRequest: InitPaymentRequest,
+    paypay_payment_service  : PaypalPaymentService= Depends(paypalPaymentService)
+):
+    return paypay_payment_service.create_payment(initPaymentRequest)
+
+
+
+
+@app.post("/capture",response_model=CapturePaymentResponseVm)
+def capturePaypalPayment(
+    capturePaymentRequest:CapturePaymentRequestVm,
+    paypay_payment_service  : PaypalPaymentService= Depends(paypalPaymentService)
+):
+    return paypay_payment_service.capturePaymentPaypal(capturePaymentRequest= capturePaymentRequest)
