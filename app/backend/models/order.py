@@ -5,10 +5,11 @@ import enum
 from datetime import datetime
 
 class OrderStatus(str, enum.Enum):
-    PENDING = "PENDING"
-    CONFIRMED = "CONFIRMED"
-    DELIVERED = "DELIVERED"
-    CANCELLED = "CANCELLED"
+    PENDING = "PENDING",
+    CONFIRMED = "CONFIRMED",
+    PROCESSING = "PROCESSING",
+    CANCELLED = "CANCELLED",
+    COMPLETED ="COMPLETED"
 
 class PaymentStatus(str, enum.Enum):
     UNPAID = "UNPAID"

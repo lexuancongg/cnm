@@ -5,11 +5,13 @@ from schemas.order_schema import *
 from models.order import *
 from models.orderItem import *
 from schemas.orderItem_schema import *
-
+from sqlalchemy import desc
+from service.imageService import *
 
 class OrderService:
-    def __init__(self, db: Session ):
+    def __init__(self, db: Session,image_service:ImageService ):
         self.db = db
+        self.imageService = image_service
 
     def createOrder( self,customerId:str ,orderPostVm:OrderPostVm)->None:
         order :Order = orderPostVm.to_model()
@@ -22,8 +24,47 @@ class OrderService:
         self.db.commit()
         self.db.refresh(order)
         
+    
+    def getMyOrders(self,orderStatus:OrderStatus,customerId:str):
+        query = self.db.query(Order)
+        query = query.filter(Order.customer_id == customerId)
+        if orderStatus is not None:
+            query = query.filter(Order.order_status == orderStatus)
 
+        query = query.order_by(desc(Order.created_at))
+        orders:List[Order] = query.all()
+        result: List[OrderVm] = []
+        for order in orders:
+            order_id = order.id
+            shippingAddressVm = self.buildShippingAddress(order.shipping_address)
+            orderItems:list[OrderItem] = order.order_items
+
+            product_avatar_map : Dict[int, str]= {
+                item.product_id : self.imageService.get_image_by_id(item.product_id).url
+                for item in orderItems
+            }
+            result.append(
+                OrderVm.from_model(order=order,order_items=order.order_items,shipping_address_vm=shippingAddressVm,product_avatar_map=product_avatar_map)
+            )
+        return result;
+
+    def  buildShippingAddress( self,shippingAddress:ShippingAddress)->ShippingAddressVm:
+        coutryId:int = shippingAddress.country_id
+        provinceId:int = shippingAddress.province_id
+        dictrictId:int = shippingAddress.district_id
+
+        return ShippingAddressVm(
+            contactName=shippingAddress.customer_name,
+            countryName=shippingAddress.country.name,
+            districtName=shippingAddress.district.name,
+            id=shippingAddress.id,
+            phoneNumber=shippingAddress.phone_number,
+            provinceName=shippingAddress.province.name,
+            specificAddress= shippingAddress.specific_address
+        )
+      
 
 
 def orderService(db:Session = Depends(get_db))->OrderService:
-    return OrderService(db)
+    image_service:ImageService = imageService(db)
+    return OrderService(db,image_service)

@@ -31,8 +31,8 @@ class ProductDetailVm(BaseModel):
     name:str
     authorName:str
     categories:List[str]
-    description:str
-    specifications:str
+    description:Optional[str]
+    specifications:Optional[str]
     slug:str
     price:float
     avatarUrl:str

@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field
+from typing import Optional
 from models.shippingAddress import ShippingAddress  # SQLAlchemy model
 
 class ShippingAddressPostVm(BaseModel):
@@ -18,3 +19,15 @@ class ShippingAddressPostVm(BaseModel):
             province_id=self.provinceId,
             country_id=self.countryId
         )
+
+
+
+
+class ShippingAddressVm(BaseModel):
+    id: Optional[int]
+    contactName: str
+    phoneNumber: str
+    specificAddress: str
+    countryName: str
+    provinceName: str
+    districtName: str
