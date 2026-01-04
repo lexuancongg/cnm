@@ -6,6 +6,8 @@ from models.product import Product
 from schemas.product_schema import ProductPreviewPagingVm, ProductPreviewVm,ProductDetailVm
 from service.imageService import ImageService
 from fastapi import HTTPException
+from sqlalchemy import func, desc
+from models.orderItem import *
 
 
 
@@ -91,6 +93,17 @@ class ProductService:
             productImageUrls=product_image_urls
         )
 
+    def getBestSellerProducts(self , page:int = 0,size:int =5)->List[ProductPreviewVm]:
+        bestSellerProductIds = (
+            self.db.query(OrderItem.product_id)
+            .group_by(OrderItem.product_id)
+            .order_by(desc(func.sum(OrderItem.quantity)))
+            .offset(page*size)
+            .limit(size)
+            .all()
+        )
+
+        return self.getProductsByIds( [row[0] for row in bestSellerProductIds])
 
 
 

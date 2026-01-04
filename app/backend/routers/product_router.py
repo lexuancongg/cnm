@@ -20,6 +20,16 @@ def get_featured_products_paging(
 
 
 
+
+@router.get("/api/product/customer/products/best-seller", response_model=List[ProductPreviewVm])
+def getBestSellerProducts(
+    db:Session = Depends(get_db)
+):  
+    
+    product_service = productService(db)
+    return product_service.getBestSellerProducts()
+
+
 @router.get("/api/product/customer/products/{slug}", response_model=ProductDetailVm)
 async def get_product_detail(
     slug: str = Path(..., description="product slug"),
@@ -27,3 +37,5 @@ async def get_product_detail(
 ):
     product_service = productService(db)
     return product_service.getProductDetailBySlug(slug)
+
+
