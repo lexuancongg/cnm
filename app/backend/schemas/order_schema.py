@@ -73,3 +73,6 @@ class OrderVm(BaseModel):
             paymentMethod=order.payment_method,
             createdAt=order.created_at
         )
+
+class CheckUserHasBoughtProductCompletedVm(BaseModel):
+    hasPurchased: bool

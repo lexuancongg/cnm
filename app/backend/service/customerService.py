@@ -1,5 +1,6 @@
 from schemas.customer_schema import *
 import requests
+from fastapi import Request,HTTPException
 
 KEYCLOAK_BASE = "http://localhost:8080"
 REALM = "ecommerce"
@@ -26,6 +27,13 @@ class CustomerService:
             raise Exception(f"Không thể cập nhật hồ sơ: {res.status_code} - {res.text}")
 
 
+    def get_customer_profile(self,request:Request)->CustomerVm:
+        user = request.session.get("user")
+
+        if not user:
+            raise HTTPException(status_code=401, detail="Unauthenticated")
+
+        return CustomerVm.from_keycloak_user(user)
 
 
 def customerService()->CustomerService:

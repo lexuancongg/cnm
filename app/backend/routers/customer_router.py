@@ -9,14 +9,8 @@ router = APIRouter()
 
 
 @router.get("/api/customers/profile",response_model=CustomerVm)
-async def  getCustomerProfile(request:Request):
-    user = request.session.get("user")
-    print(user)
-
-    if not user:
-        raise HTTPException(status_code=401, detail="Unauthenticated")
-
-    return CustomerVm.from_keycloak_user(user)
+async def  getCustomerProfile(request:Request,customer_service:CustomerService = Depends(customerService)):
+   return customer_service.get_customer_profile(request)
 
 
 

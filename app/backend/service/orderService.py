@@ -7,6 +7,8 @@ from models.orderItem import *
 from schemas.orderItem_schema import *
 from sqlalchemy import desc
 from service.imageService import *
+from sqlalchemy import exists, and_
+
 
 class OrderService:
     def __init__(self, db: Session,image_service:ImageService ):
@@ -62,7 +64,31 @@ class OrderService:
             provinceName=shippingAddress.province.name,
             specificAddress= shippingAddress.specific_address
         )
-      
+    
+
+    def checkUserHasBoughtProductCompleted(
+        self,
+        productId: int,
+        customerId: str
+    ) -> CheckUserHasBoughtProductCompletedVm:
+
+        has_purchased = (
+            self.db.query(
+                exists().where(
+                    and_(
+                        Order.customer_id == customerId,
+                        Order.order_status == OrderStatus.COMPLETED,
+                        OrderItem.order_id == Order.id,
+                        OrderItem.product_id == productId
+                    )
+                )
+            )
+            .scalar()
+        )
+
+        return CheckUserHasBoughtProductCompletedVm(hasPurchased=has_purchased)
+
+
 
 
 def orderService(db:Session = Depends(get_db))->OrderService:
