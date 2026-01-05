@@ -1,5 +1,6 @@
 from typing import List, Optional
 from pydantic import BaseModel
+from datetime import datetime
 
 
 class ProductPreviewVm(BaseModel):
@@ -8,6 +9,7 @@ class ProductPreviewVm(BaseModel):
     slug: str
     price: float
     avatarUrl: Optional[str]
+    createdOn:Optional[datetime]
 
 
 
