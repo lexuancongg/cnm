@@ -60,7 +60,17 @@ async def get_product_detail(
 
 
 
+# admin
 
+@router.get("/api/product/backoffice/products/latest/{count}",response_model=List[ProductPreviewVm])
+def getLatestProducts(
+    count: int = Path(..., ge=1),
+
+    db:Session = Depends(get_db)
+):
+    product_service = productService(db)
+    return product_service.getLatestProducts(count=5)
 
 
     
+
