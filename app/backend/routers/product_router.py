@@ -30,6 +30,26 @@ def getBestSellerProducts(
     return product_service.getBestSellerProducts()
 
 
+@router.get("/api/product/customer/products/filter",response_model=ProductPreviewPagingVm)
+def get_product_by_multi_params(
+    pageIndex: int = Query(0),
+    pageSize: int = Query(10),
+    productName: str = Query(""),
+    categorySlug: str = Query(""),
+    startPrice: Optional[float] = Query(None),
+    endPrice: Optional[float] = Query(None),
+    db: Session = Depends(get_db)
+):
+    product_service = productService(db)
+    return product_service.getProductByMultiParams(
+        pageIndex,
+        pageSize,
+        productName,
+        categorySlug,
+        startPrice,
+        endPrice
+    )
+
 @router.get("/api/product/customer/products/{slug}", response_model=ProductDetailVm)
 async def get_product_detail(
     slug: str = Path(..., description="product slug"),
@@ -37,5 +57,4 @@ async def get_product_detail(
 ):
     product_service = productService(db)
     return product_service.getProductDetailBySlug(slug)
-
 

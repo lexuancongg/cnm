@@ -8,8 +8,8 @@ from service.imageService import ImageService
 from fastapi import HTTPException
 from sqlalchemy import func, desc
 from models.orderItem import *
-
-
+from models.productCategory import ProductCategory
+from models.category import Category
 
 class ProductService:
     def __init__(self, db: Session, image_service:ImageService):
@@ -108,7 +108,69 @@ class ProductService:
 
 
 
+    def getProductByMultiParams(
+        self,
+        pageIndex: int,
+        pageSize: int,
+        productName: str,
+        categorySlug: str,
+        startPrice: float | None,
+        endPrice: float | None
+    ) -> ProductPreviewPagingVm:
+       
 
+        query = (
+            self.db.query(Product)
+            .filter(
+                Product.is_public == True
+            )
+        )
+
+        if productName:
+            query = query.filter(
+                func.lower(Product.name).like(f"%{productName.strip().lower()}%")
+            )
+
+        if categorySlug:
+            query = query.join(Product.product_categories).join(ProductCategory.category).filter(Category.slug == categorySlug.strip())
+
+        if startPrice is not None:
+            query = query.filter(Product.price >= startPrice)
+
+        if endPrice is not None:
+            query = query.filter(Product.price <= endPrice)
+
+        total_elements = query.count()
+        total_pages = (total_elements + pageSize - 1) // pageSize
+
+        products = (
+            query
+            .order_by(Product.id.asc())
+            .offset(pageIndex * pageSize)
+            .limit(pageSize)
+            .all()
+        )
+
+        content_payload = [
+            ProductPreviewVm(
+                id=p.id,
+                name=p.name,
+                slug=p.slug,
+                price=p.price,
+                avatarUrl=self.image_service.get_image_by_id(p.avatar_image_id).url
+            )
+            for p in products
+        ]
+
+        return ProductPreviewPagingVm(
+            productPreviewsPayload=content_payload,
+            pageIndex=pageIndex,
+            pageSize=pageSize,
+            totalElements=total_elements,
+            totalPages=total_pages,
+            isLast=(pageIndex + 1) >= total_pages
+        )
+        
     
 def productService(db: Session):
     image_service = ImageService(db)
