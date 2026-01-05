@@ -8,8 +8,8 @@ class ProductPreviewVm(BaseModel):
     name: str
     slug: str
     price: float
-    avatarUrl: Optional[str]
-    createdOn:Optional[datetime]
+    avatarUrl: Optional[str] = None
+    createdOn: Optional[datetime] = None
 
 
 

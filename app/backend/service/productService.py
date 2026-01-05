@@ -171,6 +171,35 @@ class ProductService:
             isLast=(pageIndex + 1) >= total_pages
         )
         
+
+    
+
+    def getLatestProducts(self,count:int)->List[ProductPreviewVm]:
+        if count <= 0:
+            return []
+        products = (
+            self.db.query(Product)
+            .filter(Product.is_public == True)
+            .order_by(Product.created_at.desc())
+            .limit(count)
+            .all()
+        )
+        if not products:
+            return []
+        return [
+            ProductPreviewVm(
+                id=p.id,
+                name=p.name,
+                slug=p.slug,
+                price=p.price,
+                createdOn=p.created_at
+            )
+            for p in products
+        ]
+        
+
+
+
     
 def productService(db: Session):
     image_service = ImageService(db)
