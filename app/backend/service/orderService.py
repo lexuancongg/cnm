@@ -89,6 +89,21 @@ class OrderService:
         return CheckUserHasBoughtProductCompletedVm(hasPurchased=has_purchased)
 
 
+    def getLatestOrders(self,count:int)->List[OrderBriefVm]:
+        if count <= 0:
+            return []
+
+        orders = (
+            self.db.query(Order)
+            .order_by(Order.created_at.desc())
+            .limit(count)
+            .all()
+        )
+
+        if not orders:
+            return []
+
+        return [OrderBriefVm.from_model(o) for o in orders]
 
 
 def orderService(db:Session = Depends(get_db))->OrderService:

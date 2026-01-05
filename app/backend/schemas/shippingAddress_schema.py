@@ -31,3 +31,15 @@ class ShippingAddressVm(BaseModel):
     countryName: str
     provinceName: str
     districtName: str
+    
+    @staticmethod
+    def from_model(shippingAddress:ShippingAddress)->"ShippingAddressVm":
+        return ShippingAddressVm(
+            id=shippingAddress.id,
+            contactName=shippingAddress.customer_name,
+            phoneNumber=shippingAddress.phone_number,
+            specificAddress=shippingAddress.specific_address,
+            countryName=shippingAddress.country.name,
+            districtName=shippingAddress.district.name,
+            provinceName=shippingAddress.province.name
+        )

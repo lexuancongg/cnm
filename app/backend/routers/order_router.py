@@ -1,7 +1,7 @@
-from fastapi import *
+
 from schemas.order_schema import *
 from service.orderService import *
-
+from fastapi import *
 router = APIRouter()
 
 
@@ -42,4 +42,14 @@ def getMyOrders(
     customer_id = user["sub"]
 
     return order_service.getMyOrders(customerId=customer_id,orderStatus=orderStatus)
+
+
+
+@router.get("/api/order/backoffice/orders/latest/{count}",response_model=List[OrderBriefVm])
+def getLatestOrders(
+    count: int = Path(..., ge=1),
+    order_service:OrderService = Depends(orderService)
+):
+    return order_service.getLatestOrders(count);
+    
     

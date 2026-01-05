@@ -76,3 +76,28 @@ class OrderVm(BaseModel):
 
 class CheckUserHasBoughtProductCompletedVm(BaseModel):
     hasPurchased: bool
+
+
+
+class OrderBriefVm(BaseModel):
+    id: int
+    email: str
+    shippingAddressVm: Optional[ShippingAddressVm] = None
+    totalPrice: Decimal
+    orderStatus: OrderStatus
+    paymentMethod:PaymentMethod
+    paymentStatus: PaymentStatus
+    createdOn: datetime
+
+    @staticmethod
+    def from_model(order:Order):
+        return OrderBriefVm(
+          paymentStatus=order.payment_status,
+          createdOn=order.created_at,
+          email=order.email,
+          id=order.id,
+          orderStatus=order.order_status,
+          shippingAddressVm=ShippingAddressVm.from_model(order.shipping_address),
+          totalPrice=order.total_price,
+          paymentMethod=order.payment_method
+        )
