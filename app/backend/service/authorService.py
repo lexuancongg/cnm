@@ -63,6 +63,48 @@ class AuthorService:
         self.db.commit()
         self.db.refresh(author)
 
+    def createAuthor(self, authorPostVm: AuthorPostVm) -> AuthorVm:
+        # check trùng name
+        exist_author = (
+            self.db.query(Author)
+            .filter(Author.name == authorPostVm.name)
+            .first()
+        )
+        if exist_author:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Author name already exists"
+            )
+
+        author = Author(
+            name=authorPostVm.name
+        )
+
+        self.db.add(author)
+        self.db.commit()
+        self.db.refresh(author)
+
+
+        
+    def deleteAuthor(self,id:int):
+        author: Author = (
+            self.db.query(Author)
+            .filter(Author.id == id)
+            .first()
+        )
+
+        if not author:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Author not found"
+            )
+        if author.products and len(author.products) > 0:
+            raise HTTPException(
+                status_code=400,
+                detail="Author is being used by products"
+            )
+        self.db.delete(author)
+        self.db.commit()
 
 
 

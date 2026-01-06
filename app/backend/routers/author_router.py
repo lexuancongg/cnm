@@ -26,3 +26,19 @@ def updateAuthorById(
     author_service: AuthorService = Depends(authorService),
 ):
     return author_service.updateAuthorById(id=id,authorPostVm=authorPostVm)
+
+
+@router.post("/api/backoffice/authors",response_model=None)
+def createAuthor(
+    authorPostVm:AuthorPostVm,
+    author_service: AuthorService = Depends(authorService),
+):
+    return author_service.createAuthor(authorPostVm=authorPostVm)
+
+
+@router.delete("/api/backoffice/authors/{id}",response_model=None)
+def deleteAuthor(
+    id:int = Path(...),
+    author_service: AuthorService = Depends(authorService),
+):
+    return author_service.deleteAuthor(id)
