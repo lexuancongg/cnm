@@ -15,6 +15,7 @@ from routers.product_router import router as product_router
 from routers.province_router import router as province_router
 from routers.user_address_router import router as user_address_router
 from routers.feedback_router import router as feedback_router
+from routers.author_router import router as author_router
 
 
 def configRouter(app):
@@ -33,6 +34,7 @@ def configRouter(app):
     app.include_router(province_router)
     app.include_router(user_address_router)
     app.include_router(feedback_router)
+    app.include_router(author_router)
 
 
 
