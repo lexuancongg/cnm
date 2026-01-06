@@ -80,7 +80,8 @@ class FeedBackService:
             star=feedbackPostVm.star,
             first_name=customer_vm.firstName,
             last_name=customer_vm.lastName,
-            created_by=customerId
+            created_by=customerId,
+            product_name = feedbackPostVm.productName
         )
 
         self.db.add(feedback)
@@ -94,6 +95,23 @@ class FeedBackService:
         return self.order_service.checkUserHasBoughtProductCompleted(customerId=customerId,productId=productId).hasPurchased
         
         
+
+    def get_latest_ratings(self, count: int) -> List[FeedbackVm]:
+        if count <= 0:
+            return []
+
+        ratings = (
+            self.db.query(Feedback)
+            .order_by(Feedback.created_at.desc())
+            .limit(count)
+            .all()
+        )
+
+        if not ratings:
+            return []
+
+        return [FeedbackVm.from_model(r) for r in ratings]
+
 
 
 

@@ -8,3 +8,4 @@ class Feedback(BaseModel):
     product_id = Column(Integer, nullable=True)
     last_name = Column(String(50), nullable=True)
     first_name = Column(String(50), nullable=True)
+    product_name = Column(String(200),nullable=False)

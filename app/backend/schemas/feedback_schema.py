@@ -1,4 +1,4 @@
-from typing import List
+from typing import List,Optional
 from pydantic import BaseModel,Field
 from datetime import datetime
 from models.feedback import Feedback
@@ -10,6 +10,8 @@ class FeedbackVm(BaseModel):
     lastName: str
     productId: int
     createAt: datetime
+    productName:Optional[str] = None
+
 
     @classmethod
     def from_model(cls, feedback:Feedback):
@@ -20,7 +22,9 @@ class FeedbackVm(BaseModel):
             firstName=feedback.first_name,
             lastName=feedback.last_name,
             productId=feedback.product_id,
-            createAt=feedback.created_at
+            createAt=feedback.created_at,
+            productName = feedback.product_name
+
         )
 
 class FeedbackPagingVm(BaseModel):
@@ -37,3 +41,4 @@ class FeedbackPostVm(BaseModel):
     content: str
     star: int = Field(..., ge=1, le=5)
     productId: int
+    productName:str

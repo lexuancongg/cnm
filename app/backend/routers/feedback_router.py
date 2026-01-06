@@ -1,7 +1,8 @@
-from fastapi import *
+
 from service.feedbackService import *
 from schemas.feedback_schema import *
 from helper.extractCustomerId  import extractCustomerId
+from fastapi import *
 router = APIRouter()
 
 @router.get("/customer/feedbacks/{product_id}/average-star",response_model=float)
@@ -33,3 +34,15 @@ def createFeedback(
     feedback_service:FeedBackService = Depends(feedbackService)
 ):
     feedback_service.createFeedback(customerId=customerId,feedbackPostVm=feedbackPostVm,request=request)
+
+
+
+
+# admin
+@router.get("/api/rating/backoffice/ratings/latest/{count}", response_model=List[FeedbackVm])
+def get_latest_ratings(
+    count: int = Path(..., ge=1),
+    db: Session = Depends(get_db),
+    feedback_service:FeedBackService = Depends(feedbackService)
+):
+    return feedback_service.get_latest_ratings(count=count)
