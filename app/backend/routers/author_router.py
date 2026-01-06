@@ -9,3 +9,20 @@ router = APIRouter()
 def getAuthor(author_service:AuthorService = Depends(authorService)):
     return author_service.getAuthor()
 
+
+
+@router.get("/api/backoffice/authors/{id}",response_model=AuthorVm)
+def getAuthorById(
+    id:int = Path(...),
+    author_service: AuthorService = Depends(authorService)
+):
+    return author_service.getAuthorById(id)
+
+
+@router.put("/api/backoffice/authors/{id}",response_model=None)
+def updateAuthorById(
+    authorPostVm:AuthorPostVm,
+    id:int = Path(...),
+    author_service: AuthorService = Depends(authorService),
+):
+    return author_service.updateAuthorById(id=id,authorPostVm=authorPostVm)

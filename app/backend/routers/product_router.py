@@ -74,3 +74,12 @@ def getLatestProducts(
 
     
 
+@router.get("/api/product/backoffice/products/{id}",response_model=ProductDetailVm)
+def getProductById(
+    id:int = Path(...),
+    db:Session = Depends(get_db)
+):
+    product_service = productService(db)
+    return product_service.getDetailProductById(id=id)
+    
+

@@ -14,3 +14,8 @@ class AuthorVm(BaseModel):
         )
 
 
+
+
+class AuthorPostVm(BaseModel):
+    name:str
+    
