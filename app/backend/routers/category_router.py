@@ -40,3 +40,23 @@ def deleteCategory(
 ):
     service = categoryService(db)
     return service.deleteCategory(id)
+
+
+@router.get("/api/backoffice/categories/{id}",response_model=CategoryVm)
+def getCategoryById(
+    id:int = Path(...),
+    db:Session = Depends(get_db)
+):
+    service = categoryService(db)
+    return service.getCategoryById(id)
+    
+
+@router.put("/api/backoffice/categories/{id}")
+def updateCategory(
+    categoryPostVm:CategoryPostVm,
+    id:int = Path(...),
+    db:Session = Depends(get_db),
+    
+):
+    service = categoryService(db)
+    return service.updateCategory(id=id,categoryPostVm=categoryPostVm)

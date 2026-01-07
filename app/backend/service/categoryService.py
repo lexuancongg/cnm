@@ -88,6 +88,60 @@ class CategoryService:
         self.db.commit()
 
 
+    def getCategoryById(self,id:int)->CategoryVm:
+        category = self.db.query(Category).filter(Category.id == id).first()
+
+        if not category:
+            raise HTTPException(404, "Category not found")
+        image = self.db.query(Image).filter(Image.id == category.image_id).first() if category.image_id else None
+        image_vm = None
+        if image:
+            url = self.image_service.get_image_by_id(image.id).url
+            image_vm = ImagePreviewVm(id=image.id, url=url)
+        return CategoryVm(
+            id=category.id,
+            imageCategory=image_vm,
+            imageId=category.image_id,
+            name=category.name,
+            slug=category.slug,
+
+        )
+
+    def updateCategory(self,id:int,categoryPostVm:CategoryPostVm):
+        category = self.db.query(Category).filter(Category.id == id).first()
+
+        if not category:
+            raise HTTPException(404, "Category not found")
+
+        exists = (
+            self.db.query(Category)
+            .filter(
+                Category.id != id,
+                or_(
+                    Category.name == categoryPostVm.name,
+                    Category.slug == categoryPostVm.slug
+                )
+            )
+            .first()
+        )
+
+        if exists:
+            raise HTTPException(
+                status_code=400,
+                detail="Category name or slug already exists"
+            )
+
+        category.name = categoryPostVm.name
+        category.slug = categoryPostVm.slug
+        category.description = categoryPostVm.description
+        category.image_id = categoryPostVm.imageId
+
+        self.db.commit()
+        self.db.refresh(category)
+
+
+        
+
 
 
 def categoryService(db: Session):

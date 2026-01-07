@@ -9,6 +9,7 @@ class CategoryVm(BaseModel):
     id: int
     name: str
     slug: Optional[str]
+    imageId:Optional[int]=None
     imageCategory: Optional[ImagePreviewVm]
 
 
