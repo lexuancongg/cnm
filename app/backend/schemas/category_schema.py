@@ -11,6 +11,7 @@ class CategoryVm(BaseModel):
     slug: Optional[str]
     imageId:Optional[int]=None
     imageCategory: Optional[ImagePreviewVm]
+    description:Optional[str] = None
 
 
 class CategoryPostVm(BaseModel):

@@ -83,3 +83,28 @@ def getProductById(
     return product_service.getDetailProductById(id=id)
     
 
+@router.get("/api/product/backoffice/category/{categorySlug}/products",response_model=ProductListGetFromCategoryVm)
+def getProductsByCategory(
+    categorySlug:str = Path(...),
+    pageNo: int = Query(0),
+    pageSize: int = Query(2),
+    db:Session = Depends(get_db)
+):
+    product_service = productService(db)
+    return product_service.getProductsByCategory(categorySlug=categorySlug,pageNo=pageNo,pageSize=pageSize)
+    
+    
+
+
+
+@router.get("/api/product/backoffice/products", response_model=ProductPreviewPagingVm)
+def get_products(
+    pageNo: int = Query(0),
+    product_name: str = Query("", alias="product-name"),
+    brand_name: str = Query("", alias="brand-name"),
+    db: Session = Depends(get_db)
+):
+    product_service = productService(db)
+    return product_service.getProductsWithFilter(brandName=brand_name,productName=product_name,pageIndex=pageNo)
+
+    

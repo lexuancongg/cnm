@@ -104,6 +104,7 @@ class CategoryService:
             imageId=category.image_id,
             name=category.name,
             slug=category.slug,
+            description= category.description
 
         )
 

@@ -10,6 +10,8 @@ class ProductPreviewVm(BaseModel):
     price: float
     avatarUrl: Optional[str] = None
     createdOn: Optional[datetime] = None
+    isPublished:Optional[bool] = None
+    isFeatured:Optional[bool]=None
 
 
 
@@ -36,3 +38,12 @@ class ProductDetailVm(BaseModel):
     avatarUrl:str
     productImageUrls:List[str]
 
+
+
+class ProductListGetFromCategoryVm(BaseModel):
+    productContent:List[ProductPreviewVm]
+    pageNo:int
+    pageSize:int
+    totalElements:int
+    totalPages: int
+    isLast:bool

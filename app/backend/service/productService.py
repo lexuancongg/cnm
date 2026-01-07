@@ -3,11 +3,12 @@ from sqlalchemy.orm import Session
 from typing import Optional, IO,List
 from pathlib import Path
 from models.product import Product
-from schemas.product_schema import ProductPreviewPagingVm, ProductPreviewVm,ProductDetailVm
+from schemas.product_schema import ProductPreviewPagingVm, ProductPreviewVm,ProductDetailVm,ProductListGetFromCategoryVm
 from service.imageService import ImageService
 from fastapi import HTTPException
 from sqlalchemy import func, desc
 from models.orderItem import *
+from models.author import Author
 from models.productCategory import ProductCategory
 from models.category import Category
 
@@ -221,6 +222,123 @@ class ProductService:
             avatarUrl=avatar_url,
             productImageUrls=product_image_urls
         )
+    
+
+
+
+    def getProductsByCategory(
+        self,
+        pageNo: int,
+        pageSize: int,
+        categorySlug: str
+    ) -> ProductListGetFromCategoryVm:
+
+        query = (
+            self.db.query(Product)
+            .join(Product.product_categories)
+            .join(ProductCategory.category)
+            .filter(
+                Category.slug == categorySlug,
+                Product.is_public == True
+            )
+        )
+
+        total_elements = query.count()
+        total_pages = (total_elements + pageSize - 1) // pageSize
+
+        products = (
+            query
+            .order_by(Product.id.asc())
+            .offset(pageNo * pageSize)
+            .limit(pageSize)
+            .all()
+        )
+
+        product_content = [
+            ProductPreviewVm(
+                id=p.id,
+                name=p.name,
+                slug=p.slug,
+                price=p.price,
+                avatarUrl=self.image_service.get_image_by_id(
+                    p.avatar_image_id
+                ).url if p.avatar_image_id else None
+            )
+            for p in products
+        ]
+
+        return ProductListGetFromCategoryVm(
+            productContent=product_content,
+            pageNo=pageNo,
+            pageSize=pageSize,
+            totalElements=total_elements,
+            totalPages=total_pages,
+            isLast=(pageNo + 1) >= total_pages
+        )
+   
+
+    def getProductsWithFilter(
+        self,
+        pageIndex: int,
+        productName: str,
+        brandName: str,
+        pageSize: int = 5
+    )->ProductPreviewPagingVm:
+         
+        query = (
+            self.db.query(Product)
+            .filter(Product.is_public == True)
+        )
+
+        if productName:
+            query = query.filter(
+                func.lower(Product.name).like(f"%{productName.strip().lower()}%")
+            )
+        if brandName:
+            query = (
+                query
+                .join(Product.author)
+                .filter(func.lower(Author.name) == brandName.strip().lower())
+            )
+        total_elements = query.count()
+        total_pages = (total_elements + pageSize - 1) // pageSize
+
+        products : list[Product]= (
+            query
+            .order_by(Product.id.asc())
+            .offset(pageIndex * pageSize)
+            .limit(pageSize)
+            .all()
+        )
+        payload = [
+            ProductPreviewVm(
+                id=p.id,
+                name=p.name,
+                slug=p.slug,
+                price=p.price,
+                avatarUrl=self.image_service.get_image_by_id(
+                    p.avatar_image_id
+                ).url if p.avatar_image_id else None,
+                isFeatured=p.is_feature,
+                isPublished=p.is_public,
+                createdOn=p.created_at
+            )
+            for p in products
+        ]
+
+        return ProductPreviewPagingVm(
+            productPreviewsPayload=payload,
+            pageIndex=pageIndex,
+            pageSize=pageSize,
+            totalElements=total_elements,
+            totalPages=total_pages,
+            isLast=(pageIndex + 1) >= total_pages
+        )
+
+            
+        
+
+
 
 
     
