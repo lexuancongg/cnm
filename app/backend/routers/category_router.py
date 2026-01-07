@@ -1,6 +1,7 @@
 from fastapi import *
 
 from service.categoryService import *
+from schemas.category_schema import *
 from db.session import get_db
 
 router = APIRouter()
@@ -19,4 +20,13 @@ def getCategories(
 ):
     service = categoryService(db)
     return service.get_categories(category_name="")
-    
+
+
+
+@router.post("/api/backoffice/categories",response_model=None)
+def createCategory(
+    categoryPostVm:CategoryPostVm,
+    db:Session = Depends(get_db),
+):
+    service = categoryService(db)
+    return service.createCategory(categoryPostVm=categoryPostVm)

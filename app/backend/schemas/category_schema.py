@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from db.session import SessionLocal
-from pydantic import BaseModel
+from pydantic import BaseModel,Field
 from schemas.image_schema import ImagePreviewVm
 
 class CategoryVm(BaseModel):
@@ -10,3 +10,10 @@ class CategoryVm(BaseModel):
     name: str
     slug: Optional[str]
     imageCategory: Optional[ImagePreviewVm]
+
+
+class CategoryPostVm(BaseModel):
+    name: str = Field(..., min_length=1)
+    slug: str = Field(..., min_length=1)
+    description: Optional[str] = None
+    imageId: Optional[int] = None

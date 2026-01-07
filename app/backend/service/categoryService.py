@@ -2,9 +2,11 @@ from sqlalchemy.orm import Session
 from models.category import Category
 from models.image import Image
 from typing import List
-from schemas.category_schema import CategoryVm
+from sqlalchemy import or_
+from schemas.category_schema import *
 from schemas.image_schema import ImagePreviewVm
 from service.imageService import ImageService
+from fastapi import *
 filesystem_host = "http://localhost:8000"
 
 
@@ -35,6 +37,39 @@ class CategoryService:
                 )
             )
         return result
+
+
+
+
+
+    def createCategory(self, categoryPostVm: CategoryPostVm) -> CategoryVm:
+        exists = (
+            self.db.query(Category)
+            .filter(
+                or_(
+                    Category.name == categoryPostVm.name,
+                    Category.slug == categoryPostVm.slug
+                )
+            )
+            .first()
+        )
+
+        if exists:
+            raise HTTPException(
+                status_code=400,
+                detail="Category name or slug already exists"
+            )
+
+        category = Category()
+        category.name = categoryPostVm.name
+        category.slug = categoryPostVm.slug
+        category.description = categoryPostVm.description
+        category.image_id = categoryPostVm.imageId
+
+        self.db.add(category)
+        self.db.commit()
+        self.db.refresh(category)
+
 
 
 def categoryService(db: Session):
