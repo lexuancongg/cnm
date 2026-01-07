@@ -1,8 +1,9 @@
-from fastapi import *
+
 
 from service.categoryService import *
 from schemas.category_schema import *
 from db.session import get_db
+from fastapi import *
 
 router = APIRouter()
 
@@ -30,3 +31,12 @@ def createCategory(
 ):
     service = categoryService(db)
     return service.createCategory(categoryPostVm=categoryPostVm)
+
+
+@router.delete("/api/backoffice/categories/{id}")
+def deleteCategory(
+    id:int = Path(...),
+    db:Session = Depends(get_db)
+):
+    service = categoryService(db)
+    return service.deleteCategory(id)

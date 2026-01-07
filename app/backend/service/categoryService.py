@@ -70,6 +70,24 @@ class CategoryService:
         self.db.commit()
         self.db.refresh(category)
 
+    
+
+    def deleteCategory(self, id: int):
+        category = self.db.query(Category).filter(Category.id == id).first()
+
+        if not category:
+            raise HTTPException(404, "Category not found")
+
+        if category.product_categories:
+            raise HTTPException(
+                status_code=400,
+                detail="Category is being used by products"
+            )
+
+        self.db.delete(category)
+        self.db.commit()
+
+
 
 
 def categoryService(db: Session):
