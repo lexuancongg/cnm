@@ -47,3 +47,19 @@ class ProductListGetFromCategoryVm(BaseModel):
     totalElements:int
     totalPages: int
     isLast:bool
+
+
+class ProductPostVm(BaseModel):
+    name: Optional[str] = None
+    slug: Optional[str] = None
+    brandId: Optional[int] = None
+    categoryIds: Optional[List[int]] = None
+    description: Optional[str] = None
+    specification: Optional[str] = None
+    price: Optional[float] = None
+    isPublished: Optional[bool] = None
+    isFeatured: Optional[bool] = None
+    thumbnailMediaId: Optional[int] = None
+    productImageIds: Optional[List[int]] = None
+
+

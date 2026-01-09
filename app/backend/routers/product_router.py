@@ -118,3 +118,13 @@ def deleteProduct(
     product_service = productService(db)
     return product_service.deleteProductById(id)
 
+
+
+
+@router.post("/api/product/backoffice/products",response_model=None)
+def createProductc(
+    productPostVm:ProductPostVm,
+    db:Session = Depends(get_db)
+):
+    product_service= productService(db)
+    return product_service.createProduct(productPostVm=productPostVm)

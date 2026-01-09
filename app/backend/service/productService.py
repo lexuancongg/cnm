@@ -1,13 +1,13 @@
-from models.image import Image
 from sqlalchemy.orm import Session
 from typing import Optional, IO,List
-from pathlib import Path
+from decimal import Decimal
 from models.product import Product
-from schemas.product_schema import ProductPreviewPagingVm, ProductPreviewVm,ProductDetailVm,ProductListGetFromCategoryVm
+from schemas.product_schema import ProductPreviewPagingVm, ProductPreviewVm,ProductDetailVm,ProductListGetFromCategoryVm,ProductPostVm
 from service.imageService import ImageService
-from fastapi import HTTPException
+from fastapi import HTTPException,status
 from sqlalchemy import func, desc
 from models.orderItem import *
+from models.productImage import ProductImage
 from models.author import Author
 from models.productCategory import ProductCategory
 from models.category import Category
@@ -356,6 +356,46 @@ class ProductService:
                 detail="Delete failed due to constraint"
             )
 
+
+
+    def createProduct(self,productPostVm:ProductPostVm):
+
+        existing_name = self.db.query(Product).filter(Product.name == productPostVm.name).first()
+        if existing_name:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="A product with this name already exists"
+            )
+
+        if productPostVm.slug:
+            existing_slug = self.db.query(Product).filter(Product.slug == productPostVm.slug).first()
+            if existing_slug:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="A product with this slug already exists"
+                )
+        product = Product()
+        product.name = productPostVm.name
+        product.description = productPostVm.description
+        product.specifications = productPostVm.specification
+        product.slug = productPostVm.slug
+        product.price = Decimal(str(productPostVm.price))
+        product.is_feature = productPostVm.isFeatured
+        product.avatar_image_id = productPostVm.thumbnailMediaId
+        product.author_id = productPostVm.brandId
+        if productPostVm.categoryIds:
+            for category_id in productPostVm.categoryIds:
+                product_category = ProductCategory(category_id=category_id)
+                product.product_categories.append(product_category)
+
+        if productPostVm.productImageIds:
+            for image_id in productPostVm.productImageIds:
+                product_image = ProductImage(image_id=image_id)
+                product.product_images.append(product_image)
+
+        self.db.add(product)
+        self.db.commit()
+        self.db.refresh(product)
 
     
 def productService(db: Session):
