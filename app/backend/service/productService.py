@@ -11,6 +11,7 @@ from models.orderItem import *
 from models.author import Author
 from models.productCategory import ProductCategory
 from models.category import Category
+from sqlalchemy.exc import IntegrityError
 
 class ProductService:
     def __init__(self, db: Session, image_service:ImageService):
@@ -287,7 +288,6 @@ class ProductService:
          
         query = (
             self.db.query(Product)
-            .filter(Product.is_public == True)
         )
 
         if productName:
@@ -336,9 +336,25 @@ class ProductService:
         )
 
             
-        
+    def deleteProductById(self,id:int):
+        product: Product = self.db.query(Product).filter(Product.id == id).first()
+
+        if not product:
+            raise HTTPException(status_code=404, detail="Product not found")
 
 
+        try:
+            product.product_categories.clear()
+            product.product_images.clear()
+
+            self.db.delete(product)
+            self.db.commit()
+        except IntegrityError as e:
+            self.db.rollback()
+            raise HTTPException(
+                status_code=400,
+                detail="Delete failed due to constraint"
+            )
 
 
     

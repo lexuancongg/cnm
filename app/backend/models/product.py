@@ -18,8 +18,15 @@ class Product(BaseModel):
     author = relationship("Author", back_populates="products")
 
 
-    product_categories = relationship("ProductCategory", back_populates="product", cascade="save-update, merge")
+    product_categories = relationship(
+        "ProductCategory",
+        back_populates="product",
+        cascade="all, delete-orphan"
+    )
 
-    # product_attribute_values = relationship("ProductAttributeValue", back_populates="product")
+    product_images = relationship(
+        "ProductImage",
+        back_populates="product",
+        cascade="all, delete-orphan"
+    )
 
-    product_images = relationship("ProductImage", back_populates="product", cascade="save-update, merge")

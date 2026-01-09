@@ -108,3 +108,13 @@ def get_products(
     return product_service.getProductsWithFilter(brandName=brand_name,productName=product_name,pageIndex=pageNo)
 
     
+
+
+@router.delete("/api/product/backoffice/products/{id}")
+def deleteProduct(
+    id:int =Path(...),
+    db:Session= Depends(get_db)
+):
+    product_service = productService(db)
+    return product_service.deleteProductById(id)
+
