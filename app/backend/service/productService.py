@@ -268,6 +268,7 @@ class ProductService:
 
         return ProductVm(
             id=product.id,
+            slug=product.slug,
             name=product.name,
             description=product.description,
             specification=product.specifications,
@@ -458,6 +459,87 @@ class ProductService:
         self.db.add(product)
         self.db.commit()
         self.db.refresh(product)
+
+
+
+
+    def updateProduct(self, id: int, productPostVm: ProductPostVm):
+
+        product: Product = (
+            self.db.query(Product)
+            .filter(Product.id == id)
+            .first()
+        )
+
+        if not product:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Product not found: {id}"
+            )
+
+        if productPostVm.name:
+            existing_name = (
+                self.db.query(Product)
+                .filter(Product.name == productPostVm.name, Product.id != id)
+                .first()
+            )
+            if existing_name:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="A product with this name already exists"
+                )
+            product.name = productPostVm.name
+
+        if productPostVm.slug:
+            existing_slug = (
+                self.db.query(Product)
+                .filter(Product.slug == productPostVm.slug, Product.id != id)
+                .first()
+            )
+            if existing_slug:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail="A product with this slug already exists"
+                )
+            product.slug = productPostVm.slug
+
+        if productPostVm.description is not None:
+            product.description = productPostVm.description
+
+        if productPostVm.specification is not None:
+            product.specifications = productPostVm.specification
+
+        if productPostVm.price is not None:
+            product.price = Decimal(str(productPostVm.price))
+
+        if productPostVm.isFeatured is not None:
+            product.is_feature = productPostVm.isFeatured
+
+        if productPostVm.thumbnailMediaId is not None:
+            product.avatar_image_id = productPostVm.thumbnailMediaId
+
+        if productPostVm.brandId is not None:
+            product.author_id = productPostVm.brandId
+
+        if productPostVm.categoryIds is not None:
+            product.product_categories.clear()
+            for category_id in productPostVm.categoryIds:
+                product.product_categories.append(
+                    ProductCategory(category_id=category_id)
+                )
+
+        if productPostVm.productImageIds is not None:
+            product.product_images.clear()
+            for image_id in productPostVm.productImageIds:
+                product.product_images.append(
+                    ProductImage(image_id=image_id)
+                )
+
+        self.db.commit()
+        self.db.refresh(product)
+
+
+
 
     
 def productService(db: Session):

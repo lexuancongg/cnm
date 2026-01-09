@@ -72,6 +72,7 @@ class ProductVm(BaseModel):
     description: str
     specification: str
     price: float
+    slug:str
     isPublished: bool
     isFeatured: bool
     brandId: int

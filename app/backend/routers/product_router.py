@@ -130,3 +130,13 @@ def createProductc(
     return product_service.createProduct(productPostVm=productPostVm)
 
 
+@router.put("/api/product/backoffice/products/{id}",response_model=None)
+def updateProduct(
+    productPostVm:ProductPostVm,
+    id:int = Path(...),
+   
+    db:Session = Depends(get_db)
+):
+    product_service= productService(db)
+    return product_service.updateProduct(id=id,productPostVm=productPostVm)
+    
