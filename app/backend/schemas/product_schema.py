@@ -1,6 +1,8 @@
 from typing import List, Optional
 from pydantic import BaseModel
 from datetime import datetime
+from schemas.category_schema import CategoryVm
+from schemas.image_schema import ImagePreviewVm
 
 
 class ProductPreviewVm(BaseModel):
@@ -63,3 +65,18 @@ class ProductPostVm(BaseModel):
     productImageIds: Optional[List[int]] = None
 
 
+
+class ProductVm(BaseModel):
+    id: int
+    name: str
+    description: str
+    specification: str
+    price: float
+    isPublished: bool
+    isFeatured: bool
+    brandId: int
+    categories: List[CategoryVm]
+    thumbnailMedia: ImagePreviewVm
+    productImageMedias: List[ImagePreviewVm]
+    avatarUrl: str
+    createdOn: datetime

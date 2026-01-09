@@ -2,15 +2,17 @@ from sqlalchemy.orm import Session
 from typing import Optional, IO,List
 from decimal import Decimal
 from models.product import Product
-from schemas.product_schema import ProductPreviewPagingVm, ProductPreviewVm,ProductDetailVm,ProductListGetFromCategoryVm,ProductPostVm
+from schemas.product_schema import ProductPreviewPagingVm, ProductPreviewVm,ProductDetailVm,ProductListGetFromCategoryVm,ProductPostVm,ProductVm
 from service.imageService import ImageService
 from fastapi import HTTPException,status
 from sqlalchemy import func, desc
 from models.orderItem import *
+from schemas.image_schema import ImagePreviewVm
 from models.productImage import ProductImage
 from models.author import Author
 from models.productCategory import ProductCategory
 from models.category import Category
+from schemas.category_schema import CategoryVm
 from sqlalchemy.exc import IntegrityError
 
 class ProductService:
@@ -200,29 +202,89 @@ class ProductService:
         ]
         
     
-    def getDetailProductById(self,id:int)->ProductDetailVm:
-        product:Product = self.db.query(Product).filter(Product.id == id).first()
-        if not product:
-            raise HTTPException(status_code=404, detail=f"Product not found: {slug}")
+    def getDetailProductById(self,id:int)->ProductVm:
+        # product:Product = self.db.query(Product).filter(Product.id == id).first()
+        # if not product:
+        #     raise HTTPException(status_code=404, detail=f"Product not found: {slug}")
         
-        avatar_url : str = self.image_service.get_image_by_id(product.avatar_image_id).url
-        image_ids = [ img.image_id for img in product.product_images]
-        product_image_urls = [self.image_service.get_image_by_id(image_id).url for image_id in image_ids]
-        author_name = product.author.name
+        # avatar_url : str = self.image_service.get_image_by_id(product.avatar_image_id).url
+        # image_ids = [ img.image_id for img in product.product_images]
+        # product_image_urls = [self.image_service.get_image_by_id(image_id).url for image_id in image_ids]
+        # author_name = product.author.name
 
-        categories =  [category.category.name for category in product.product_categories]
-        return ProductDetailVm(
+        # categories =  [category.category.name for category in product.product_categories]
+        # return ProductDetailVm(
+        #     id=product.id,
+        #     name=product.name,
+        #     authorName=author_name,
+        #     categories=categories,
+        #     description=product.description,
+        #     specifications=product.specifications,
+        #     slug=product.slug,
+        #     price=float(product.price),
+        #     avatarUrl=avatar_url,
+        #     productImageUrls=product_image_urls
+        # )
+        product: Product = (
+            self.db.query(Product)
+            .filter(Product.id == id)
+            .first()
+        )
+
+        if not product:
+            raise HTTPException(status_code=404, detail=f"Product not found: {id}")
+        thumbnail = None
+        if product.avatar_image_id:
+            thumbnail = self.image_service.get_image_by_id(product.avatar_image_id)
+
+        product_image_medias = []
+        for img in product.product_images:
+            image_vm = self.image_service.get_image_by_id(img.image_id)
+            product_image_medias.append(
+                ImagePreviewVm(id=image_vm.id, url=image_vm.url)
+            )
+        categories = []
+        for pc in product.product_categories:
+            cat = pc.category
+            image_category = None
+
+            if cat.image_id:
+                image_vm = self.image_service.get_image_by_id(cat.image_id)
+                image_category = ImagePreviewVm(
+                    id=image_vm.id,
+                    url=image_vm.url
+                )
+
+            categories.append(
+                CategoryVm(
+                    id=cat.id,
+                    name=cat.name,
+                    description=cat.description,
+                    slug=cat.slug,
+                    imageId=cat.image_id,
+                    imageCategory=image_category
+                )
+            )
+
+        return ProductVm(
             id=product.id,
             name=product.name,
-            authorName=author_name,
-            categories=categories,
             description=product.description,
-            specifications=product.specifications,
-            slug=product.slug,
+            specification=product.specifications,
             price=float(product.price),
-            avatarUrl=avatar_url,
-            productImageUrls=product_image_urls
+            isPublished=product.is_public,
+            isFeatured=product.is_feature,
+            brandId=product.author_id,  # nếu brand riêng thì đổi lại
+            categories=categories,
+            thumbnailMedia=ImagePreviewVm(
+                id=thumbnail.id,
+                url=thumbnail.url
+            ) if thumbnail else None,
+            productImageMedias=product_image_medias,
+            avatarUrl=thumbnail.url if thumbnail else "",
+            createdOn=product.created_at
         )
+
     
 
 

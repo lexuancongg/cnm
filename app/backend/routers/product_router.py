@@ -74,7 +74,7 @@ def getLatestProducts(
 
     
 
-@router.get("/api/product/backoffice/products/{id}",response_model=ProductDetailVm)
+@router.get("/api/product/backoffice/products/{id}",response_model=ProductVm)
 def getProductById(
     id:int = Path(...),
     db:Session = Depends(get_db)
@@ -128,3 +128,5 @@ def createProductc(
 ):
     product_service= productService(db)
     return product_service.createProduct(productPostVm=productPostVm)
+
+
