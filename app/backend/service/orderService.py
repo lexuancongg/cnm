@@ -128,6 +128,30 @@ class OrderService:
         return [OrderBriefVm.from_model(o) for o in orders]
 
 
+    def getOrderById(self, id: int) -> OrderVm:
+        order: Order = self.db.query(Order).filter(Order.id == id).first()
+        if not order:
+            raise HTTPException(status_code=404, detail=f"Order not found: {id}")
+
+        shippingAddressVm = self.buildShippingAddress(order.shipping_address)
+
+        product_avatar_map: Dict[int, str] = {
+            item.product_id: self.imageService.get_image_by_id(item.product_id).url
+            for item in order.order_items
+        }
+
+        return OrderVm.from_model(
+            order=order,
+            order_items=order.order_items,
+            shipping_address_vm=shippingAddressVm,
+            product_avatar_map=product_avatar_map
+        )
+
+       
+
+
+
+
 
 def orderService(db:Session = Depends(get_db))->OrderService:
     image_service:ImageService = imageService(db)

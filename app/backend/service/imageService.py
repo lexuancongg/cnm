@@ -31,12 +31,12 @@ class ImageService:
         image = self.db.query(Image).filter(Image.id == id).first()
         if not image:
             raise HTTPException(status_code=404, detail="Image not found")
-
         path = Path(image.file_path)
         if not path.exists():
-            raise HTTPException(status_code=404, detail="File not found")
+            raise HTTPException(status_code=404, detail="File a not found")
 
         url = f"{filesystem_host}/images/{image.id}/file/{image.file_name}"
+        print(url)
 
         return ImageDetailVm(
             id=image.id,

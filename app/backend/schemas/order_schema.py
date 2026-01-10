@@ -46,6 +46,7 @@ class OrderVm(BaseModel):
     orderItemVms: List[OrderItemVm]
     checkoutId: Optional[int]
     paymentMethod: PaymentMethod
+    paymentStatus:Optional[PaymentStatus] = None 
     createdAt: datetime
 
     @staticmethod
@@ -71,7 +72,8 @@ class OrderVm(BaseModel):
             orderItemVms=order_item_vms,
             checkoutId=order.checkout_id,
             paymentMethod=order.payment_method,
-            createdAt=order.created_at
+            createdAt=order.created_at,
+            paymentStatus=order.payment_status,
         )
 
 class CheckUserHasBoughtProductCompletedVm(BaseModel):

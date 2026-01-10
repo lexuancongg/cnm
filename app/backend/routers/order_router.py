@@ -61,3 +61,13 @@ def getOrders(
 
 ):
     return order_service.getOrders(productName)
+
+
+
+@router.get("/api/order/backoffice/orders/{id}",response_model=OrderVm)
+def getOrders(
+    id:int =Path(...),
+    order_service:OrderService = Depends(orderService)
+
+):
+    return order_service.getOrderById(id)
