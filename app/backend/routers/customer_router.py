@@ -40,3 +40,12 @@ def updateCustomerProfile(
         "lastname": customerPutVm.lastName
     })
 
+
+
+@router.get("/api/customer/backoffice/customers",response_model=CustomerPagingVm)
+def getAllCustomer(
+    pageNo:int  = Query(0),
+    customer_service:CustomerService = Depends(customerService)
+):
+    return customer_service.getCustomers(pageNo)
+    

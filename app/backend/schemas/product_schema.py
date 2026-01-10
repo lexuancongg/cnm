@@ -80,4 +80,4 @@ class ProductVm(BaseModel):
     thumbnailMedia: ImagePreviewVm
     productImageMedias: List[ImagePreviewVm]
     avatarUrl: str
-    createdOn: datetime
+    createdOn: Optional[datetime] =None
