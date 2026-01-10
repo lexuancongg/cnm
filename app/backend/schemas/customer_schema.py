@@ -62,3 +62,9 @@ class CustomerCreateVm(BaseModel):
     lastName: str
     password: str = Field(..., min_length=6)
     role: str
+
+
+class CustomerUpdateVm(BaseModel):
+    email: EmailStr
+    firstName: str
+    lastName: str

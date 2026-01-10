@@ -35,7 +35,7 @@ class CustomerService:
 
 
 
-        
+
         if not user:
             raise HTTPException(status_code=401, detail="Unauthenticated")
 
@@ -85,7 +85,6 @@ class CustomerService:
             "Content-Type": "application/json"
         }
 
-        # 1️⃣ tạo user
         create_user_url = f"{KEYCLOAK_BASE}/admin/realms/{REALM}/users"
         payload = {
             "username": customerPostVm.username,
@@ -127,10 +126,55 @@ class CustomerService:
         assign_role_url = f"{create_user_url}/{user_id}/role-mappings/realm"
         requests.post(assign_role_url, json=[role_res.json()], headers=headers)
 
-        return {"message": "Tạo customer + gán role thành công 🚀"}
 
 
 
+
+    def getCustomerById(self, user_id: str) -> CustomerVm:
+        admin_token = getAdminToken()
+
+        url = f"{KEYCLOAK_BASE}/admin/realms/{REALM}/users/{user_id}"
+        headers = {
+            "Authorization": f"Bearer {admin_token}",
+            "Accept": "application/json"
+        }
+
+        res = requests.get(url, headers=headers)
+        if res.status_code == 404:
+            raise HTTPException(404, "User không tồn tại")
+        if res.status_code != 200:
+            raise HTTPException(res.status_code, res.text)
+
+        user = res.json()
+
+        if not user.get("enabled"):
+            raise HTTPException(404, "User đã bị disable")
+
+        return CustomerVm.from_admin_user(user)
+
+
+    def updateCustomerById(self, id: str, customerPutVm: CustomerUpdateVm):
+        admin_token = getAdminToken()
+
+        url = f"{KEYCLOAK_BASE}/admin/realms/{REALM}/users/{id}"
+        headers = {
+            "Authorization": f"Bearer {admin_token}",
+            "Content-Type": "application/json"
+        }
+
+        payload = {
+            "email": customerPutVm.email,
+            "firstName": customerPutVm.firstName,
+            "lastName": customerPutVm.lastName
+        }
+
+        res = requests.put(url, json=payload, headers=headers)
+
+        if res.status_code == 404:
+            raise HTTPException(404, "User không tồn tại")
+
+        if res.status_code not in (200, 204):
+            raise HTTPException(res.status_code, res.text)
 
 
 

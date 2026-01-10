@@ -61,5 +61,22 @@ def createUser(
     return customer_servicee.createCustomer(customerPostVm=customerPostVm)
 
 
+@router.get("/api/customer/backoffice/customers/profile/{id}",response_model=CustomerVm)
+def getCustomerById(
+    id:str= Path(...),
+    customer_servicee:CustomerService = Depends(customerService)
+):
+    return customer_servicee.getCustomerById(id)
+
+
+@router.put("/api/customer/backoffice/customers/profile/{id}",response_model=None)
+def updateProfileById(
+    customerPutVm:CustomerUpdateVm,
+    id:str= Path(...),
+    customer_servicee:CustomerService = Depends(customerService)
+
+):
+    return customer_servicee.updateCustomerById(id=id,customerPutVm=customerPutVm)
+
 
 
