@@ -42,3 +42,23 @@ class FeedbackPostVm(BaseModel):
     star: int = Field(..., ge=1, le=5)
     productId: int
     productName:str
+
+
+
+
+class RatingVm(BaseModel):
+    id: int
+    content: str
+    star: int
+    productId: int
+    createdOn: datetime
+    lastName: str
+    firstName: str
+    productName: str
+
+
+
+
+class RatingPagingVm(BaseModel):
+    ratingList:list[RatingVm]
+    totalPages:int 

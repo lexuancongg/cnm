@@ -79,4 +79,9 @@ def updateProfileById(
     return customer_servicee.updateCustomerById(id=id,customerPutVm=customerPutVm)
 
 
-
+@router.delete("/api/customer/backoffice/customers/profile/{id}",response_model=None)
+def deleteCustomerById(
+    id:str= Path(...),
+    customer_servicee:CustomerService = Depends(customerService)
+):
+    return customer_servicee.deleteCustomerById(id)

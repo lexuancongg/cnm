@@ -114,6 +114,67 @@ class FeedBackService:
 
 
 
+    def getRatings(
+        self,
+        pageNo: int,
+        pageSize: int,
+        productName: str
+    ) -> RatingPagingVm:
+
+        query = self.db.query(Feedback)
+
+        if productName:
+            query = query.filter(
+                Feedback.product_name.ilike(f"%{productName}%")
+            )
+
+        total = query.count()
+        totalPages = ceil(total / pageSize) if pageSize else 0
+
+        feedbacks = (
+            query
+            .order_by(Feedback.created_at.desc())
+            .offset(pageNo * pageSize)
+            .limit(pageSize)
+            .all()
+        )
+
+        ratingList = [
+            RatingVm(
+                id=fb.id,
+                content=fb.content,
+                star=fb.star,
+                productId=fb.product_id,
+                createdOn=fb.created_at,
+                lastName=fb.last_name,
+                firstName=fb.first_name,
+                productName=fb.product_name
+            )
+            for fb in feedbacks
+        ]
+
+        return RatingPagingVm(
+            ratingList=ratingList,
+            totalPages=totalPages
+        )
+
+    def deleteRating(self, id: int):
+        rating = (
+            self.db.query(Feedback)
+            .filter(Feedback.id == id)
+            .first()
+        )
+
+        if not rating:
+            raise HTTPException(
+                status_code=404,
+                detail="Rating not found"
+            )
+
+        self.db.delete(rating)
+        self.db.commit()
+
+
 
 def feedbackService(db:Session = Depends(get_db), customer_service = Depends(customerService) ,order_service = Depends(orderService) ):
     return FeedBackService(db=db,customer_service=customer_service,order_service=order_service)

@@ -1,4 +1,5 @@
 from models.base import BaseModel
+from datetime import datetime
 from sqlalchemy import Column, String, Integer, ForeignKey, Numeric, Enum
 
 
@@ -9,3 +10,4 @@ class Feedback(BaseModel):
     last_name = Column(String(50), nullable=True)
     first_name = Column(String(50), nullable=True)
     product_name = Column(String(200),nullable=False)
+

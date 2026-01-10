@@ -176,6 +176,22 @@ class CustomerService:
         if res.status_code not in (200, 204):
             raise HTTPException(res.status_code, res.text)
 
+    def deleteCustomerById(self, id: str):
+        admin_token = getAdminToken()
+
+        url = f"{KEYCLOAK_BASE}/admin/realms/{REALM}/users/{id}"
+        headers = {
+            "Authorization": f"Bearer {admin_token}"
+        }
+
+        res = requests.delete(url, headers=headers)
+
+        if res.status_code == 404:
+            raise HTTPException(404, "User không tồn tại")
+
+        if res.status_code != 204:
+            raise HTTPException(res.status_code, res.text)
+
 
 
 def customerService()->CustomerService:

@@ -46,3 +46,23 @@ def get_latest_ratings(
     feedback_service:FeedBackService = Depends(feedbackService)
 ):
     return feedback_service.get_latest_ratings(count=count)
+
+
+
+
+@router.get("/api/rating/backoffice/ratings",response_model=RatingPagingVm)
+def getRatings(
+    pageNo:int=Query(0),
+    pageSize:int = Query(10),
+    productName = Query(""),
+    feedback_service:FeedBackService = Depends(feedbackService),
+):
+    return feedback_service.getRatings(pageNo=pageNo,pageSize=pageSize,productName=productName)
+
+
+@router.delete("/api/rating/backoffice/ratings/{id}",response_model=None)
+def deleteRating(
+    id:int = Path(...),
+    feedback_service:FeedBackService = Depends(feedbackService)
+):
+    return feedback_service.deleteRating(id)
