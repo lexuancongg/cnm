@@ -1,6 +1,7 @@
 from schemas.customer_schema import *
 from config.security import CLIENT_ID
 import requests
+from helper.getAdmintoken import getAdminToken
 from fastapi import Request,HTTPException
 
 KEYCLOAK_BASE = "http://localhost:8080"
@@ -30,7 +31,11 @@ class CustomerService:
 
     def get_customer_profile(self,request:Request)->CustomerVm:
         user = request.session.get("user")
+        userId = user['sub']
 
+
+
+        
         if not user:
             raise HTTPException(status_code=401, detail="Unauthenticated")
 
@@ -39,17 +44,8 @@ class CustomerService:
 
 
     def getCustomers(self,pageNo:int):
-        url = "http://localhost:8080/realms/master/protocol/openid-connect/token"
-        data = {
-            "client_id":"admin-cli",
-            "grant_type": "password",
-            "username": "lexuancong",
-            "password": "lexuancong"
-        }
 
-        res = requests.post(url, data=data)
-        res.raise_for_status()
-        access_token = res.json()["access_token"]
+        access_token = getAdminToken()
         USER_PER_PAGE = 20
         url = "http://localhost:8080/admin/realms/ecommerce/users"
         params = {
@@ -79,6 +75,62 @@ class CustomerService:
             totalPage=total_page,
             totalUser=total_user
         )
+    
+
+    def  createCustomer(self, customerPostVm: CustomerCreateVm):
+        token = getAdminToken()
+
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json"
+        }
+
+        # 1️⃣ tạo user
+        create_user_url = f"{KEYCLOAK_BASE}/admin/realms/{REALM}/users"
+        payload = {
+            "username": customerPostVm.username,
+            "email": customerPostVm.email,
+            "firstName": customerPostVm.firstName,
+            "lastName": customerPostVm.lastName,
+            "enabled": True
+        }
+
+        res = requests.post(create_user_url, json=payload, headers=headers)
+        if res.status_code != 201:
+            raise HTTPException(400, res.text)
+
+        res = requests.get(
+            create_user_url,
+            headers=headers,
+            params={"username": customerPostVm.username}
+        )
+        users = res.json()
+        if not users:
+            raise HTTPException(404, "Không tìm thấy user vừa tạo")
+
+        user_id = users[0]["id"]
+
+        pwd_url = f"{create_user_url}/{user_id}/reset-password"
+        pwd_payload = {
+            "type": "password",
+            "value": customerPostVm.password,
+            "temporary": False
+        }
+        requests.put(pwd_url, json=pwd_payload, headers=headers)
+
+        role_url = f"{KEYCLOAK_BASE}/admin/realms/{REALM}/roles/{customerPostVm.role}"
+        role_res = requests.get(role_url, headers=headers)
+
+        if role_res.status_code != 200:
+            raise HTTPException(400, "Role không tồn tại")
+
+        assign_role_url = f"{create_user_url}/{user_id}/role-mappings/realm"
+        requests.post(assign_role_url, json=[role_res.json()], headers=headers)
+
+        return {"message": "Tạo customer + gán role thành công 🚀"}
+
+
+
 
 
 

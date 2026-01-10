@@ -48,4 +48,18 @@ def getAllCustomer(
     customer_service:CustomerService = Depends(customerService)
 ):
     return customer_service.getCustomers(pageNo)
+
+
+
+
     
+@router.post("/api/customer/backoffice/customers",response_model=None)
+def createUser(
+    customerPostVm:CustomerCreateVm,
+    customer_servicee:CustomerService = Depends(customerService)
+):
+    return customer_servicee.createCustomer(customerPostVm=customerPostVm)
+
+
+
+

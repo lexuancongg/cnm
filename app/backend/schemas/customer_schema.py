@@ -1,4 +1,4 @@
-from pydantic import BaseModel,EmailStr
+from pydantic import BaseModel,EmailStr,Field
 from typing import Optional, Dict, Any
 from datetime import datetime,timezone
 
@@ -51,3 +51,14 @@ class CustomerPagingVm(BaseModel):
     customers:list[CustomerVm]
     totalPage:int
     totalUser:int
+
+
+
+
+class CustomerCreateVm(BaseModel):
+    username: str = Field(..., min_length=3)
+    email: EmailStr
+    firstName: str
+    lastName: str
+    password: str = Field(..., min_length=6)
+    role: str
