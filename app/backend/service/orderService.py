@@ -5,6 +5,7 @@ from schemas.order_schema import *
 from models.order import *
 from models.orderItem import *
 from schemas.orderItem_schema import *
+from models.product import Product
 from sqlalchemy import desc
 from service.imageService import *
 from sqlalchemy import exists, and_
@@ -104,6 +105,28 @@ class OrderService:
             return []
 
         return [OrderBriefVm.from_model(o) for o in orders]
+    
+
+
+    def getOrders(self, productName: str) -> List[OrderBriefVm]:
+        query = (
+            self.db.query(Order)
+            .join(OrderItem, OrderItem.order_id == Order.id)
+            .join(Product, Product.id == OrderItem.product_id)
+        )
+
+        if productName:
+            query = query.filter(Product.name.ilike(f"%{productName}%"))
+
+        orders = (
+            query
+            .order_by(desc(Order.created_at))
+            .distinct()
+            .all()
+        )
+
+        return [OrderBriefVm.from_model(o) for o in orders]
+
 
 
 def orderService(db:Session = Depends(get_db))->OrderService:

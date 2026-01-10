@@ -53,3 +53,11 @@ def getLatestOrders(
     return order_service.getLatestOrders(count);
     
     
+
+@router.get("/api/order/backoffice/orders",response_model=List[OrderBriefVm])
+def getOrders(
+    productName:str = Query(""),
+    order_service:OrderService = Depends(orderService)
+
+):
+    return order_service.getOrders(productName)
