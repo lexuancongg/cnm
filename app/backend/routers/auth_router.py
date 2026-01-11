@@ -21,6 +21,7 @@ async def auth(request: Request):
     refresh_token = token["refresh_token"]
     user = token["userinfo"]
     id_token = token["id_token"]
+    print(access_token)
 
     request.session["user"] = {
         "sub": user["sub"],

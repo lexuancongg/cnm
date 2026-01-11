@@ -1,4 +1,7 @@
 from fastapi import *
+from mid.auth_mid import auth_mid
+from helper.owned_mid import get_owned_entity
+
 from schemas.address_schema import *
 from service.addressService import *
 
@@ -8,10 +11,8 @@ router = APIRouter()
 
 
 
-
-@router.get("/customer/address/{id}",response_model=AddressDetailVm)
+@router.get("/customer/address/{id}",response_model=AddressDetailVm,dependencies=[Depends(auth_mid)])
 def getAddress(
-    request:Request,
     id:int,
     address_service :AddressService = Depends(addressService)
 

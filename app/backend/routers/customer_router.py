@@ -1,6 +1,6 @@
 from fastapi import *
 from schemas.customer_schema import *
-
+from mid.auth_mid import auth_mid
 from service.customerService import *
 
 router = APIRouter()
@@ -16,13 +16,14 @@ async def  getCustomerProfile(request:Request,customer_service:CustomerService =
 
 
 
-@router.put("/customer/profile",response_model=None)
+@router.put("/customer/profile",response_model=None,dependencies=[Depends(auth_mid)])
 def updateCustomerProfile(
     request:Request,
     customerPutVm: CustomerProfilePutVm,
     customer_service:CustomerService = Depends(customerService)
 ):
     user = request.session.get("user")
+    print("bu")
     customer_id = user["sub"]
     customerPutVm.username = user["username"]
     access_token = request.session.get("access_token")
