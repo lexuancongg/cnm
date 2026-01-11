@@ -8,7 +8,7 @@ router = APIRouter()
 
 
 
-@router.get("/api/customers/profile",response_model=CustomerVm)
+@router.get("/api/customers/profile",response_model=CustomerVm,dependencies=[Depends(auth_mid)])
 async def  getCustomerProfile(request:Request,customer_service:CustomerService = Depends(customerService)):
    return customer_service.get_customer_profile(request)
 

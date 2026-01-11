@@ -17,11 +17,8 @@ async def login(request: Request):
 @router.get("/auth")
 async def auth(request: Request):
     token = await oauth.keycloak.authorize_access_token(request)
-    access_token = token["access_token"]
-    refresh_token = token["refresh_token"]
     user = token["userinfo"]
     id_token = token["id_token"]
-    print(access_token)
 
     request.session["user"] = {
         "sub": user["sub"],
@@ -33,6 +30,7 @@ async def auth(request: Request):
     }
     request.session["access_token"] = token["access_token"]
     request.session["refresh_token"] = token["refresh_token"]
+    
 
 
     
@@ -43,7 +41,7 @@ async def auth(request: Request):
 @router.get("/authentication", response_model=AuthenticationInfoVm)
 async def authentication(request: Request):
     user = request.session.get("user")
-    
+
     if not user:
         return AuthenticationInfoVm(isAuthenticated=False, authenticatedUser=None)
     

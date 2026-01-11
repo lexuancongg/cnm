@@ -1,6 +1,8 @@
 from schemas.product_schema import *
 from db.session import get_db
 from service.productService import *
+from mid.admin_mid import checkRoleAdmin
+from mid.auth_mid import auth_mid
 
 from fastapi import *
 
@@ -62,7 +64,7 @@ async def get_product_detail(
 
 # admin
 
-@router.get("/api/product/backoffice/products/latest/{count}",response_model=List[ProductPreviewVm])
+@router.get("/api/product/backoffice/products/latest/{count}",response_model=List[ProductPreviewVm],dependencies=[Depends(auth_mid),Depends(checkRoleAdmin)])
 def getLatestProducts(
     count: int = Path(..., ge=1),
 
@@ -74,7 +76,7 @@ def getLatestProducts(
 
     
 
-@router.get("/api/product/backoffice/products/{id}",response_model=ProductVm)
+@router.get("/api/product/backoffice/products/{id}",response_model=ProductVm,dependencies=[Depends(auth_mid),Depends(checkRoleAdmin)])
 def getProductById(
     id:int = Path(...),
     db:Session = Depends(get_db)
@@ -83,7 +85,7 @@ def getProductById(
     return product_service.getDetailProductById(id=id)
     
 
-@router.get("/api/product/backoffice/category/{categorySlug}/products",response_model=ProductListGetFromCategoryVm)
+@router.get("/api/product/backoffice/category/{categorySlug}/products",response_model=ProductListGetFromCategoryVm,dependencies=[Depends(auth_mid),Depends(checkRoleAdmin)])
 def getProductsByCategory(
     categorySlug:str = Path(...),
     pageNo: int = Query(0),
@@ -97,7 +99,7 @@ def getProductsByCategory(
 
 
 
-@router.get("/api/product/backoffice/products", response_model=ProductPreviewPagingVm)
+@router.get("/api/product/backoffice/products", response_model=ProductPreviewPagingVm,dependencies=[Depends(auth_mid),Depends(checkRoleAdmin)])
 def get_products(
     pageNo: int = Query(0),
     product_name: str = Query("", alias="product-name"),
@@ -110,7 +112,7 @@ def get_products(
     
 
 
-@router.delete("/api/product/backoffice/products/{id}")
+@router.delete("/api/product/backoffice/products/{id}",dependencies=[Depends(auth_mid),Depends(checkRoleAdmin)])
 def deleteProduct(
     id:int =Path(...),
     db:Session= Depends(get_db)
@@ -121,7 +123,7 @@ def deleteProduct(
 
 
 
-@router.post("/api/product/backoffice/products",response_model=None)
+@router.post("/api/product/backoffice/products",response_model=None,dependencies=[Depends(auth_mid),Depends(checkRoleAdmin)])
 def createProductc(
     productPostVm:ProductPostVm,
     db:Session = Depends(get_db)
@@ -130,7 +132,7 @@ def createProductc(
     return product_service.createProduct(productPostVm=productPostVm)
 
 
-@router.put("/api/product/backoffice/products/{id}",response_model=None)
+@router.put("/api/product/backoffice/products/{id}",response_model=None,dependencies=[Depends(auth_mid),Depends(checkRoleAdmin)])
 def updateProduct(
     productPostVm:ProductPostVm,
     id:int = Path(...),

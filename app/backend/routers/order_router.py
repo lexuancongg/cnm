@@ -1,4 +1,5 @@
-
+from mid.admin_mid import checkRoleAdmin
+from mid.auth_mid import auth_mid
 from schemas.order_schema import *
 from service.orderService import *
 from fastapi import *
@@ -8,7 +9,7 @@ router = APIRouter()
 
     
 
-@router.post("/customer/orders",response_model=None)
+@router.post("/customer/orders",response_model=None,dependencies=[Depends(auth_mid)])
 def createOrder(
     request:Request,
     orderPostVm :OrderPostVm,
@@ -27,7 +28,7 @@ def createOrder(
 
 
 
-@router.get("/customer/orders/my-orders",response_model=List[OrderVm])
+@router.get("/customer/orders/my-orders",response_model=List[OrderVm],dependencies=[Depends(auth_mid)])
 def getMyOrders(
     request:Request,
     orderStatus: Optional[OrderStatus] = Query(None),
@@ -45,7 +46,7 @@ def getMyOrders(
 
 
 
-@router.get("/api/order/backoffice/orders/latest/{count}",response_model=List[OrderBriefVm])
+@router.get("/api/order/backoffice/orders/latest/{count}",response_model=List[OrderBriefVm],dependencies=[Depends(auth_mid),Depends(checkRoleAdmin)])
 def getLatestOrders(
     count: int = Path(..., ge=1),
     order_service:OrderService = Depends(orderService)
@@ -54,7 +55,7 @@ def getLatestOrders(
     
     
 
-@router.get("/api/order/backoffice/orders",response_model=List[OrderBriefVm])
+@router.get("/api/order/backoffice/orders",response_model=List[OrderBriefVm],dependencies=[Depends(auth_mid),Depends(checkRoleAdmin)])
 def getOrders(
     productName:str = Query(""),
     order_service:OrderService = Depends(orderService)
@@ -64,7 +65,7 @@ def getOrders(
 
 
 
-@router.get("/api/order/backoffice/orders/{id}",response_model=OrderVm)
+@router.get("/api/order/backoffice/orders/{id}",response_model=OrderVm,dependencies=[Depends(auth_mid),Depends(checkRoleAdmin)])
 def getOrders(
     id:int =Path(...),
     order_service:OrderService = Depends(orderService)

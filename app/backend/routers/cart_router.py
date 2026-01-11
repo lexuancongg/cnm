@@ -1,5 +1,6 @@
 
-
+from mid.auth_mid import auth_mid
+from mid.admin_mid import checkRoleAdmin
 from db.session import get_db
 from schemas.cart_schema import *
 
@@ -11,7 +12,7 @@ router = APIRouter()
 
 
 
-@router.get("/cart/customer/cart-items", response_model= List[CartItemDetailVm])
+@router.get("/cart/customer/cart-items", response_model= List[CartItemDetailVm],dependencies=[Depends(auth_mid)])
 def getCartItems(request:Request, db: Session = Depends(get_db)):
     user = request.session.get("user")
     if not user:

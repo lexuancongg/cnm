@@ -1,15 +1,17 @@
 from fastapi import *
 
 from typing import List
-
+from mid.admin_mid import checkRoleAdmin
+from mid.auth_mid import auth_mid
 from schemas.userAddress_schema import *
 from service.userAddressService import *
+
 
 
 router = APIRouter()
 
 
-@router.get("/customer/user-address/default", response_model=AddressDetailVm)
+@router.get("/customer/user-address/default", response_model=AddressDetailVm,dependencies=[Depends(auth_mid)])
 def getDefaultAddress(request:Request ,user_address_service :userAddressService = Depends(userAddressService) ):
     user = request.session.get("user")
     if not user:
@@ -20,7 +22,7 @@ def getDefaultAddress(request:Request ,user_address_service :userAddressService 
 
 
 
-@router.post("/customer/user-address",response_model=UserAddressVm)
+@router.post("/customer/user-address",response_model=UserAddressVm,dependencies=[Depends(auth_mid)])
 def createUserAddress(
     request:Request,
     addressPostVm: AddressPostVm,
@@ -37,7 +39,7 @@ def createUserAddress(
 
 
 
-@router.get("/customer/user-address/addresses",response_model=List[AddressDetailVm])
+@router.get("/customer/user-address/addresses",response_model=List[AddressDetailVm],dependencies=[Depends(auth_mid)])
 def getUserAddressDetail(
     request:Request,
     user_address_service:UserAddressService = Depends(userAddressService)
@@ -51,7 +53,7 @@ def getUserAddressDetail(
 
 
 
-@router.put("/customer/user-address/{id}",response_model=None)
+@router.put("/customer/user-address/{id}",response_model=None,dependencies=[Depends(auth_mid)])
 def chooseDefaultAddress(
     request:Request,
     id:int,
@@ -66,7 +68,7 @@ def chooseDefaultAddress(
 
 
 
-@router.delete("/customer/user-address/{id}")
+@router.delete("/customer/user-address/{id}",dependencies=[Depends(auth_mid)])
 def deleteAddress(
     request:Request,
     id:int,

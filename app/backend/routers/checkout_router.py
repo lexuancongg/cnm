@@ -1,4 +1,6 @@
 from fastapi import *
+
+from mid.auth_mid import auth_mid
 from schemas.checkout_schema import *
 from db.session import get_db
 from service.checkoutService import *
@@ -8,7 +10,7 @@ from sqlalchemy.orm import Session
 router = APIRouter()
 
     
-@router.post("/customer/checkouts")
+@router.post("/customer/checkouts",dependencies=[Depends(auth_mid)])
 def createCheckout(
     request:Request,
     checkoutPostVm:CheckoutPostVm,
@@ -24,7 +26,7 @@ def createCheckout(
 
 
 
-@router.get("/customer/checkouts/{id}",response_model= CheckoutVm)
+@router.get("/customer/checkouts/{id}",response_model= CheckoutVm,dependencies=[Depends(auth_mid)])
 def getCheckoutById(
     request:Request,
     id:int,

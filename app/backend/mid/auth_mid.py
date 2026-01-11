@@ -31,6 +31,7 @@ async def auth_mid(request: Request):
     token = request.session.get("access_token")
 
     if not token:
+        request.session.clear()
         raise HTTPException(401, "Unauthenticated")
 
     try:
@@ -39,8 +40,7 @@ async def auth_mid(request: Request):
         refresh_token = request.session.get("refresh_token")
 
         if not refresh_token:
-            request.session.pop("access_token", None)
-            request.session.pop("refresh_token", None)
+            request.session.clear()
 
             raise HTTPException(401, "Session expired")
 
@@ -51,8 +51,7 @@ async def auth_mid(request: Request):
 
             return verify_token(new_token["access_token"])
         except HTTPException:
-            request.session.pop("access_token", None)
-            request.session.pop("refresh_token", None)
+            request.session.clear()
             raise HTTPException(401, "Re-login required")
         
 
