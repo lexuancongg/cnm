@@ -1,0 +1,6 @@
+export enum DeliveryMethod  {
+    VIETTEL_POST = 'VIETTEL_POST',
+    GRAB_EXPRESS = 'GRAB_EXPRESS',
+    SHOPEE_EXPRESS = 'SHOPEE_EXPRESS',
+
+}

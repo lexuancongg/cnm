@@ -1,0 +1,81 @@
+/* Container */
+.pagination-container {
+    width: 100%;
+    height: auto;
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    gap: 8px; /* Khoảng cách giữa các nút */
+    margin-top: 20px;
+    padding: 0;
+}
+
+/* Nút Previous và Next */
+.pagination-container .previous-btn a,
+.pagination-container .next-btn a {
+    border-radius: 50%;
+    background-color: #f0f0f0; /* Màu nền nhạt */
+    color: #555; /* Màu chữ */
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.pagination-container .previous-btn a:hover,
+.pagination-container .next-btn a:hover {
+    background-color: #007bff; /* Màu xanh chủ đạo */
+    color: white;
+}
+
+/* Nút Trang */
+.pagination-container a {
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 50%; /* Bo góc tròn */
+    background-color: #fff;
+    color: #555;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Đổ bóng nhẹ */
+}
+
+.pagination-container a:hover {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+/* Nút Trang Hoạt Động */
+.pagination-active a {
+    font-weight: bold;
+    color: white !important;
+    background-color: #007bff !important;
+    border-color: #007bff !important;
+    box-shadow: 0 4px 6px rgba(0, 123, 255, 0.4); /* Đổ bóng nổi bật */
+}
+
+/* Nút Bị Vô Hiệu */
+.pagination-disabled a {
+    color: rgb(180, 180, 180) !important;
+    background-color: #f9f9f9 !important;
+    border-color: #ddd !important;
+    cursor: not-allowed;
+}
+
+.pagination-disabled a:hover {
+    background-color: #f9f9f9;
+    color: rgb(180, 180, 180) !important;
+    border-color: #ddd;
+}
+
+/* Hiệu Ứng Hover */
+.pagination-container li:hover {
+    transform: translateY(-2px); /* Hiệu ứng nổi lên khi hover */
+    transition: transform 0.2s ease;
+}

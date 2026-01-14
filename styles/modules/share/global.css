@@ -1,0 +1,63 @@
+/* import các css mặc định cơ bản dành cho toàn bộ ter như html*/
+@tailwind base;
+/* import component để sử dụng*/
+@tailwind components;
+/* khác với bootraps , nó chỉ inject css của cacs class chúng ta sử dụng , nó giúp inject vào trình duyệt*/
+@tailwind utilities;
+
+
+
+
+input,
+textarea,
+label {
+    display: block;
+    outline: none;
+    border: none;
+}
+button {
+    outline: none;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+}
+
+button:focus {
+    outline: none;
+}
+
+
+.title{
+    font-size: 16px;
+    text-transform: uppercase;
+    text-align: start;
+    height: 60px;
+    line-height: 60px;
+    padding-left: 20px;
+    color: #27272a;
+}
+
+*,
+*:before,
+*:after {
+    margin: 0px;
+    padding: 0px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+
+
+
+body,
+html {
+  font-family: Arial, sans-serif;
+  font-size: 15px;
+
+  height: 100%;
+  background-color: #fff;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
